@@ -502,3 +502,70 @@ body {
   color: #ff007f !important;
   text-shadow: 0 0 3px #ff007f;
 }
+
+/* --- ESTILOS PARA LA NUEVA PANTALLA DE PREPARACIÓN DE SLOTS --- */
+#pantalla-espera-slots {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: #05050d;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9998;
+}
+
+#caja-espera-slots {
+  background-color: rgba(0, 85, 255, 0.02);
+  border: 2px solid #0055ff;
+  border-radius: 8px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0, 85, 255, 0.15);
+  max-width: 600px; width: 90%;
+}
+
+#caja-espera-slots h2 {
+  color: #00f0ff; text-shadow: 0 0 8px #00f0ff; font-size: 22px; letter-spacing: 2px; margin: 0 0 5px 0;
+}
+
+#grid-slots-preparacion {
+  display: flex !important; flex-direction: row !important; gap: 25px !important; margin: 25px 0 !important;
+}
+
+.bloque-preparacion-equipo {
+  flex: 1 !important; display: flex !important; flex-direction: column !important;
+  gap: 12px !important; padding: 15px !important; border-radius: 4px !important;
+  background-color: rgba(0,0,0,0.4) !important;
+}
+.bloque-preparacion-equipo.cian { border: 1px solid #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); }
+.bloque-preparacion-equipo.azul { border: 1px solid #007aff; box-shadow: 0 0 10px rgba(0, 122, 255, 0.1); }
+
+.bloque-preparacion-equipo h3 { font-size: 13px; letter-spacing: 1px; margin: 0 0 5px 0; }
+.bloque-preparacion-equipo.cian h3 { color: #00f0ff; text-shadow: 0 0 5px #00f0ff; }
+.bloque-preparacion-equipo.azul h3 { color: #007aff; text-shadow: 0 0 5px #007aff; }
+
+/* Botones interactivos de las ranuras */
+.btn-ocupar-slot {
+  height: 42px !important; background-color: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important; color: #888 !important;
+  border-radius: 4px !important; font-family: monospace !important; font-weight: bold !important;
+  cursor: pointer !important; transition: all 0.2s ease !important; font-size: 11px !important;
+}
+.btn-ocupar-slot:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+/* Efecto cuando la ranura está ocupada por un jugador con luz verde de listo */
+.btn-ocupar-slot.ocupado {
+  background-color: rgba(57, 255, 20, 0.05) !important;
+  border: 1px solid #39ff14 !important;
+  color: #fff !important;
+  text-shadow: 0 0 5px #39ff14 !important;
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.2) !important;
+  cursor: not-allowed !important;
+}
+
+#btn-iniciar-partida-lobby {
+  background-color: #39ff14 !important; color: #000 !important; font-weight: bold !important;
+  border: none !important; border-radius: 4px !important; width: 100% !important;
+  height: 45px !important; font-family: monospace !important; font-size: 14px !important;
+  letter-spacing: 1px !important; cursor: pointer !important;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4) !important; transition: all 0.2s !important;
+}
+#btn-iniciar-partida-lobby:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(57, 255, 20, 0.6); }
