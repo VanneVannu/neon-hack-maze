@@ -1,6 +1,6 @@
 // PARTE 1 DE 3: Variables, Selección de Equipos y Control del Lobby
 
-// --- 1. CONEXIÓN INALÁMBRICA PROVISIONAL (APAGADA PARA PRUEBAS LOCALES) ---
+// --- 1. CONEXIÓN INALÁMBRICA PROVISIONAL ---
 const socket = io(); 
 
 // --- 2. CONFIGURACIÓN BASE EVOLUCIONADA Y ELEMENTOS ---
@@ -73,11 +73,8 @@ function entrarAlJuego(codigoSala) {
   // MODIFICADO: Enviamos un objeto completo al servidor con código y alias real
   socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 
-  generarLaberintoProcedural();
-  calcularRangoRadarVision(); 
-  dibujarLaberintoEnPantalla();
-  actualizarBrilloPanelesTurnos();
 }
+
 
 // Función local para procesar el envío de un mensaje hacia el servidor
 function enviarMensajeTexto() {
@@ -465,23 +462,15 @@ socket.on('recibir-mensaje', (datosRecibidos) => {
   }
 });
 
-// 1. ANTENA RECEPTORA MULTIJUGADOR: Sincroniza la lista de integrantes en los paneles
-socket.on('actualizar-lista-integrantes', (datosSala) => {
-  console.log("Lista de integrantes actualizada por red:", datosSala);
+// 2. ANTENA RECEPTORA DE MAPA: Recibe el laberinto oficial e idéntico del servidor
+socket.on('recibir-mapa-sincronizado', (datos) => {
+  console.log("¡Mapa único del servidor recibido con éxito!");
   
-  // Inyectamos los apodos reales dentro de las ranuras correspondientes
-  document.querySelector('#slot-cian-1 .nombre-slot').textContent = datosSala.n1;
-  document.querySelector('#slot-azul-1 .nombre-slot').textContent = datosSala.n2;
-  document.querySelector('#slot-cian-2 .nombre-slot').textContent = datosSala.n3;
-  document.querySelector('#slot-azul-2 .nombre-slot').textContent = datosSala.n4;
-
-  // Si el servidor nos asignó un slot de juego, configuramos nuestro bando automático
-  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador") {
-    // Los slots 1 y 3 pertenecen al Clan Cian, el 2 y 4 al Clan Azul
-    const miClanAsignado = (datosSala.tuSlot === "hacker1" || datosSala.tuSlot === "hacker3") ? "equipo-cian" : "equipo-azul";
-    bandoAsignado = miClanAsignado;
-    selectorBando.value = miClanAsignado; // Cambia el menú desplegable automáticamente
-    dibujarLaberintoEnPantalla(); // Actualiza el radar según tu nuevo equipo
-  }
+  // Guardamos el laberinto oficial en nuestra matriz local
+  matrizLaberinto = datos.mapa;
+  
+  // Calculamos los radares de la niebla de guerra y dibujamos las casillas exactas
+  calcularRangoRadarVision();
+  dibujarLaberintoEnPantalla();
+  actualizarBrilloPanelesTurnos();
 });
-
