@@ -205,15 +205,17 @@ body {
   width: 240px !important;
 }
 
-/* Forzar que el chat ocupe una altura fija estética */
+/* --- BLINDAJE ULTRA-VISIBLE PARA EL CONTENEDOR DEL CHAT --- */
 #contenedor-chat {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-  border: 2px solid #0055ff !important;
+  background-color: #0d0c1d !important; /* Fondo oscuro Cyberpunk */
+  border: 2px solid #0055ff !important; /* Borde azul de red */
   border-radius: 4px !important;
   display: flex !important;
   flex-direction: column !important;
-  box-shadow: 0 0 15px rgba(0, 85, 255, 0.1) !important;
-  height: 380px !important; /* Un poco más alto para que sea cómodo de leer */
+  box-shadow: 0 0 15px rgba(0, 85, 255, 0.2) !important;
+  height: 380px !important; /* Altura fija para que no se encoja */
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 #titulo-chat, #titulo-codigo-lateral {
@@ -223,18 +225,34 @@ body {
 
 
 #mensajes-chat {
-  flex: 1 !important; /* Empuja el formulario al fondo */
+  flex: 1 !important;
   overflow-y: auto !important;
   padding: 10px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
-  font-size: 12px !important;
+  background-color: #05050d !important; /* Fondo interno */
+  min-height: 280px !important; /* Forzar espacio para mensajes */
 }
 
 
-#formulario-chat { display: flex; padding: 8px; border-top: 1px solid rgba(0, 85, 255, 0.3); }
-#entrada-mensaje { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-family: monospace; }
+#formulario-chat {
+  display: flex !important;
+  padding: 8px !important;
+  background-color: #0d0c1d !important;
+  border-top: 1px solid rgba(0, 85, 255, 0.3) !important;
+}
+
+
+#entrada-mensaje {
+  flex: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  outline: none !important;
+  font-family: monospace !important;
+}
+
 #btn-enviar-chat { background: transparent; border: none; color: #00f0ff; cursor: pointer; font-weight: bold; }
 
 #caja-codigo-texto { padding: 12px; text-align: center; background-color: #020206; }
@@ -444,31 +462,34 @@ body {
   transition: background-color 0.4s ease !important;
 }
 
-/* --- TRUCO DE VISIBILIDAD MÁXIMA PARA EL CHAT --- */
+/* Forzar que las burbujas de texto sean visibles y blancas */
 .mensaje {
   display: block !important;
-  color: #ffffff !important; /* Texto blanco brillante */
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important; /* TEXTO BLANCO BRILLANTE */
   font-family: monospace !important;
   font-size: 12px !important;
-  padding: 4px 6px !important;
-  margin-bottom: 4px !important;
-  background-color: rgba(255, 255, 255, 0.02) !important;
-  border-radius: 3px !important;
+  padding: 6px 8px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 4px !important;
   width: 100% !important;
   box-sizing: border-box !important;
+  margin-bottom: 5px !important;
 }
 
-.msg-neon-0 .remitente { color: #00f0ff !important; text-shadow: 0 0 5px #00f0ff !important; } 
-.msg-neon-1 .remitente { color: #39ff14 !important; text-shadow: 0 0 5px #39ff14 !important; } 
-.msg-neon-2 .remitente { color: #ffff00 !important; text-shadow: 0 0 5px #ffff00 !important; } 
-.msg-neon-3 .remitente { color: #ff9900 !important; text-shadow: 0 0 5px #ff9900 !important; } 
-.msg-neon-4 .remitente { color: #cc00ff !important; text-shadow: 0 0 5px #cc00ff !important; } 
-.msg-neon-5 .remitente { color: #00ffcc !important; text-shadow: 0 0 5px #00ffcc !important; } 
-.msg-neon-6 .remitente { color: #ff007f !important; text-shadow: 0 0 5px #ff007f !important; } 
+/* Colores Neón ultra-visibles para los Alias */
+.msg-neon-0 .remitente { color: #00f0ff !important; text-shadow: 0 0 5px #00f0ff !important; font-weight: bold !important; }
+.msg-neon-1 .remitente { color: #39ff14 !important; text-shadow: 0 0 5px #39ff14 !important; font-weight: bold !important; }
+.msg-neon-2 .remitente { color: #ffff00 !important; text-shadow: 0 0 5px #ffff00 !important; font-weight: bold !important; }
+.msg-neon-3 .remitente { color: #ff9900 !important; text-shadow: 0 0 5px #ff9900 !important; font-weight: bold !important; }
+.msg-neon-4 .remitente { color: #cc00ff !important; text-shadow: 0 0 5px #cc00ff !important; font-weight: bold !important; }
+.msg-neon-5 .remitente { color: #00ffcc !important; text-shadow: 0 0 5px #00ffcc !important; font-weight: bold !important; }
+.msg-neon-6 .remitente { color: #ff007f !important; text-shadow: 0 0 5px #ff007f !important; font-weight: bold !important; }
 
 .cuerpo-msg {
-  color: #ffffff !important;
-  font-weight: normal !important;
+  color: #ffffff !important; /* Fuerza el texto del mensaje a ser blanco */
+  display: inline !important;
 }
 
 /* Estilo para los nombres reales dentro de la lista de miembros */
