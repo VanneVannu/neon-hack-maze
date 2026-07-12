@@ -15,32 +15,47 @@ let redesOcupadas = {};
 io.on('connection', (socket) => {
   console.log(`[CONEXIÓN]: Nuevo terminal enlazado al sistema -> ID: ${socket.id}`);
 
-  // --- 1. ACCEDER A UN NODO DE RED PRIVADO ---
-  socket.on('unirse-a-sala', (codigoSala) => {
+   // --- 1. ACCEDER A UN NODO DE RED PRIVADO Y REGISTRAR PARTICIPANTES ---
+  socket.on('unirse-a-sala', (datosDeEntrada) => {
+    // Soportamos que datosDeEntrada sea solo el código o un objeto: { sala: "e33mu", apodo: "Anon" }
+    const codigoSala = datosDeEntrada.sala || datosDeEntrada;
+    const apodoReal = datosDeEntrada.apodo || "Anon";
+
     socket.miRedActual = codigoSala;
-    socket.join(codigoSala); // Unir el dispositivo a la habitación digital oficial
+    socket.miApodoEnRed = apodoReal;
+    socket.join(codigoSala); 
 
     if (!redesOcupadas[codigoSala]) {
-      // Si la red es nueva, creamos su registro de memoria base
       redesOcupadas[codigoSala] = {
-        hacker1: null, nombreH1: null,
-        hacker2: null, nombreH2: null,
-        hacker3: null, nombreH3: null,
-        hacker4: null, nombreH4: null,
-        contadorColor: 0,
-        mapaLogico: null,
-        partidaIniciada: false,
-        ordenTurnosServidor: null,
-        indiceTurnoServidor: 0
+        hacker1: null, nombreH1: "Esperando...",
+        hacker2: null, nombreH2: "Esperando...",
+        hacker3: null, nombreH3: "Esperando...",
+        hacker4: null, nombreH4: "Esperando...",
+        contadorColor: 0
       };
     }
 
-    // Repartidor infinito de 7 colores neón para el chat
-    socket.miNumeroColor = redesOcupadas[codigoSala].contadorColor % 7;
-    redesOcupadas[codigoSala].contadorColor++;
+    let red = redesOcupadas[codigoSala];
 
-    console.log(`[NODO]: Terminal ${socket.id} ingresó a la red: ${codigoSala.toUpperCase()} con color neón: ${socket.miNumeroColor}`);
+    // Asignación automática de ranura (slot) libre por orden de llegada al nodo
+    if (red.hacker1 === null) { red.hacker1 = socket.id; red.nombreH1 = apodoReal; socket.miSlotAsignado = "hacker1"; }
+    else if (red.hacker2 === null) { red.hacker2 = socket.id; red.nombreH2 = apodoReal; socket.miSlotAsignado = "hacker2"; }
+    else if (red.hacker3 === null) { red.hacker3 = socket.id; red.nombreH3 = apodoReal; socket.miSlotAsignado = "hacker3"; }
+    else if (red.hacker4 === null) { red.hacker4 = socket.id; red.nombreH4 = apodoReal; socket.miSlotAsignado = "hacker4"; }
+    else { socket.miSlotAsignado = "espectador"; } // Si está lleno, entra como espectador
+
+    socket.miNumeroColor = red.contadorColor % 7;
+    red.contadorColor++;
+
+    // Transmitir de inmediato la lista de integrantes en tiempo real a toda la sala
+    io.to(codigoSala).emit('actualizar-lista-integrantes', {
+      n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4,
+      tuSlot: socket.miSlotAsignado
+    });
+
+    console.log(`[NODO]: ${apodoReal} asignado al slot ${socket.miSlotAsignado} en la sala ${codigoSala}`);
   });
+
 
   // --- 2. CANAL DE COMUNICACIÓN (CHAT MULTICOLOR) ---
   socket.on('enviar-mensaje', (datosMensaje) => {
@@ -55,13 +70,25 @@ io.on('connection', (socket) => {
   });
 
   // --- 3. DESCONEXIÓN DEL TERMINAL ---
-  socket.on('disconnect', () => {
-    console.log(`[DESCONEXIÓN]: Terminal desconectado -> ID: ${socket.id}`);
-    // Aquí limpiaremos más adelante los slots si un jugador cierra la pestaña
+    socket.on('disconnect', () => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      let red = redesOcupadas[redNombre];
+      if (red.hacker1 === socket.id) { red.hacker1 = null; red.nombreH1 = "Esperando..."; }
+      if (red.hacker2 === socket.id) { red.hacker2 = null; red.nombreH2 = "Esperando..."; }
+      if (red.hacker3 === socket.id) { red.hacker3 = null; red.nombreH3 = "Esperando..."; }
+      if (red.hacker4 === socket.id) { red.hacker4 = null; red.nombreH4 = "Esperando..."; }
+
+      io.to(redNombre).emit('actualizar-lista-integrantes', {
+        n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4
+      });
+    }
   });
+
 });
 
 // Encender los motores del servidor de internet
 http.listen(PORT, () => {
   console.log(`[SERVIDOR]: NeonHackMaze operativo en puerto de red -> ${PORT}`);
 });
+
