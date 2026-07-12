@@ -240,7 +240,7 @@ function dibujarLaberintoEnPantalla() {
 }
 
 
-// --- 7. MOVIMIENTOS POR TURNOS ROTATIVOS DE MIEMBROS ---
+// --- 7. MOVIMIENTO DE NODOS COORDINADO POR INTERNET ---
 function handleCasillaClick(fila, columna) {
   if (!partidaIniciada || juegoTerminado || bandoAsignado === "espectador") return;
 
@@ -262,23 +262,34 @@ function handleCasillaClick(fila, columna) {
 
   const difF = Math.abs(fila - datosAvatarEquipo.f);
   const difC = Math.abs(columna - datosAvatarEquipo.c);
-  if ((difF + difC) !== 1) return; // Un solo paso en cruz
+  if ((difF + difC) !== 1) return;
 
-  historialPosiciones[clanActivo] = { f: datosAvatarEquipo.f, c: datosAvatarEquipo.c };
+  // Despachamos la solicitud de movimiento al servidor para que lo mueva en las 4 pantallas por igual
+  socket.emit('solicitar-movimiento-hacker', {
+    clan: clanActivo,
+    fDes: fila,
+    cDes: columna,
+    hackerId: hackerIdActivo
+  });
+}
 
-  datosAvatarEquipo.f = fila;
-  datosAvatarEquipo.c = columna;
+// Función ejecutora final que corre en las 4 pantallas de forma simultánea
+function ejecutarMovimientoFisicoSincronizado(clan, fDes, cDes) {
+  const datosAvatar = posicionesHackers[clan];
+  historialPosiciones[clan] = { f: datosAvatar.f, c: datosAvatar.c };
+
+  datosAvatar.f = fDes;
+  datosAvatar.c = cDes;
   pasosDisponibles--;
   
-  // Cambiamos el texto explicativo de pasos en el visor
-  visorAccionSistema.textContent = `PASOS RESTANTES EN RED: ${pasosDisponibles}`;
+  document.getElementById('visor-dado').textContent = `PASOS: ${pasosDisponibles}`;
   
   calcularRangoRadarVision(); 
   dibujarLaberintoEnPantalla();
 
-  if (matrizLaberinto[fila][columna] === 2) {
+  if (matrizLaberinto[fDes][cDes] === 2) {
     juegoTerminado = true;
-    alert(`¡INFILTRACIÓN EXITOSA! El ${clanActivo.toUpperCase()} quebro el núcleo central!`);
+    alert(`¡INFILTRACIÓN EXITOSA! El ${clan.toUpperCase()} quebro el núcleo central!`);
     return;
   }
 
@@ -286,6 +297,7 @@ function handleCasillaClick(fila, columna) {
     rotarTurnoElectronico();
   }
 }
+
 
 function rotarTurnoElectronico() {
   dadoLanzadoEsteTurno = false;
@@ -315,13 +327,13 @@ function actualizarBrilloPanelesTurnos() {
   bandoActualTxt.textContent = ordenTurnos[indiceTurnoActual].toUpperCase().replace("HACKER", "HACKER ");
 }
 
-// --- 8. BOTONES INTERACTIVOS Y LANZAMIENTO DEL DADO ---
+// --- 8. EMISORES Y RECEPTORES INALÁMBRICOS DE ACCIONES SUPERIORES ---
+
 btnTirarDado.addEventListener('click', () => {
   if (!partidaIniciada || juegoTerminado || bandoAsignado === "espectador") return;
 
   const hackerIdActivo = ordenTurnos[indiceTurnoActual];
   const clanActivo = (hackerIdActivo === "hacker1" || hackerIdActivo === "hacker3") ? "equipo-cian" : "equipo-azul";
-  const datosAvatar = posicionesHackers[clanActivo];
 
   if (bandoAsignado !== clanActivo) {
     alert("No es tu turno de lanzar el dado.");
@@ -329,148 +341,108 @@ btnTirarDado.addEventListener('click', () => {
   }
 
   if (dadoLanzadoEsteTurno) return;
+
+  // El cliente calcula el dado e informa inmediatamente al servidor para sincronizarlo
+  const resultadoDado = Math.floor(Math.random() * 6) + 1;
+  socket.emit('solicitar-lanzamiento-dado', { numero: resultadoDado, hackerId: hackerIdActivo, clan: clanActivo });
+});
+
+btnIniciarPartida.addEventListener('click', () => {
+  if (bandoAsignado === "espectador") {
+    alert("Acceso denegado: Debes elegir un equipo para iniciar el hackeo.");
+    return;
+  }
+  // Lanzamos la moneda digital del sorteo y le avisamos al servidor
+  const sorteoInicial = Math.random() > 0.5;
+  socket.emit('solicitar-inicio-partida', { sorteoCian: sorteoInicial });
+});
+
+btnReiniciar.addEventListener('click', () => {
+  if (bandoAsignado === "espectador") return;
+  socket.emit('solicitar-reiniciar-red');
+});
+
+// =======================================================
+// --- SINTONIZACIÓN DE LAS NUEVAS ANTENAS DE RED ---
+// =======================================================
+
+// Receptor: Sincronizar el dado neón visual
+socket.on('servidor-retransmitir-dado', (datos) => {
   dadoLanzadoEsteTurno = true;
   cuboNeonDado.classList.remove('congelado', 'firewall');
+  cuboNeonDado.textContent = datos.numero;
 
-  const resultadoDado = Math.floor(Math.random() * 6) + 1;
-  cuboNeonDado.textContent = resultadoDado;
-
-  if (resultadoDado === 1) {
+  if (datos.numero === 1) {
     cuboNeonDado.classList.add('congelado');
     visorAccionSistema.textContent = "SISTEMA CONGELADO ❄️ (PIERDES TURNO)";
     setTimeout(rotarTurnoElectronico, 1500); 
   } 
-  else if (resultadoDado === 6) {
+  else if (datos.numero === 6) {
     cuboNeonDado.classList.add('firewall');
     visorAccionSistema.textContent = "ALERTA FIREWALL 🛡️ (RETROCEDES 1 PASO)";
-    if (historialPosiciones[clanActivo]) {
-      datosAvatar.f = historialPosiciones[clanActivo].f;
-      datosAvatar.c = historialPosiciones[clanActivo].c;
+    if (historialPosiciones[datos.clan]) {
+      posicionesHackers[datos.clan].f = historialPosiciones[datos.clan].f;
+      posicionesHackers[datos.clan].c = historialPosiciones[datos.clan].c;
       calcularRangoRadarVision();
       dibujarLaberintoEnPantalla();
     }
     setTimeout(rotarTurnoElectronico, 1500);
   } 
-  else if (resultadoDado === 2 || resultadoDado === 3) {
+  else if (datos.numero === 2 || datos.numero === 3) {
     pasosDisponibles = 1;
     visorAccionSistema.textContent = "AVANZA 1 NODO ⚙️";
+    document.getElementById('visor-dado').textContent = `PASOS: ${pasosDisponibles}`;
   } 
   else {
     pasosDisponibles = 2;
     visorAccionSistema.textContent = "SOBRECARGA: AVANZA 2 NODOS ⚡";
+    document.getElementById('visor-dado').textContent = `PASOS: ${pasosDisponibles}`;
   }
 });
 
-// --- 9. BOTÓN DE INICIO CON SORTEO DE TURNO AUTOMÁTICO ---
-btnIniciarPartida.addEventListener('click', () => {
-  if (bandoAsignado === "espectador") {
-    alert("Acceso denegado: Debes elegir un equipo (Cian o Azul) para iniciar el hackeo.");
-    return;
-  }
-  
+// Receptor: Sincronizar los pasos físicos del avatar
+socket.on('servidor-retransmitir-movimiento', (datos) => {
+  ejecutarMovimientoFisicoSincronizado(datos.clan, datos.fDes, datos.cDes);
+});
+
+// Receptor: Sincronizar el encendido e inicio por sorteo inalámbrico
+socket.on('servidor-confirmar-inicio', (datos) => {
   partidaIniciada = true;
   btnIniciarPartida.classList.add('oculto');
   visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
 
-  // --- SORTEO CYBERPUNK AUTOMÁTICO DE INICIO ---
-  // Lanzamos una moneda digital (dado virtual): 50% de probabilidad para cada equipo
-  const sorteoInicial = Math.random() > 0.5;
-
-  if (sorteoInicial) {
-    // Si sale verdadero, arranca el Equipo Cian en su orden normal
+  if (datos.sorteoCian) {
     ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
-    alert("⚡ [SORTEO DE RED]: Conexión establecida. ¡Equipo Cian toma la iniciativa! Turno de Hacker 1.");
+    alert("⚡ [SORTEO DE RED]: ¡Equipo Cian toma la iniciativa! Turno de Hacker 1.");
   } else {
-    // Si sale falso, reordenamos la red para que el Equipo Azul tenga la ventaja inicial
     ordenTurnos = ["hacker2", "hacker1", "hacker4", "hacker3"];
-    alert("⚡ [SORTEO DE RED]: Conexión establecida. ¡Equipo Azul toma la iniciativa! Turno de Hacker 2.");
+    alert("⚡ [SORTEO DE RED]: ¡Equipo Azul toma la iniciativa! Turno de Hacker 2.");
   }
-
-  indiceTurnoActual = 0; // Forzamos a que empiece el primero de la lista ganadora
-  
-  // Caída de la niebla y encendido de marcos neón
+  indiceTurnoActual = 0;
   dibujarLaberintoEnPantalla(); 
   actualizarBrilloPanelesTurnos();
 });
 
-
-btnReiniciar.addEventListener('click', () => {
-  if (bandoAsignado === "espectador") return;
+// Receptor: Sincronizar la limpieza total para la revancha
+socket.on('servidor-confirmar-reinicios', (datos) => {
   partidaIniciada = false; juegoTerminado = false;
   selectorBando.value = "espectador"; bandoAsignado = "espectador";
-  indiceTurnoActual = 0; 
-  dadoLanzadoEsteTurno = false; 
-  pasosDisponibles = 0;
-  ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"]; // <-- NUEVA LÍNEA: Resetea el orden base
+  indiceTurnoActual = 0; dadoLanzadoEsteTurno = false; pasosDisponibles = 0;
   cuboNeonDado.textContent = "--"; cuboNeonDado.classList.remove('congelado', 'firewall');
   visorAccionSistema.textContent = "ESPERANDO INICIO...";
+  document.getElementById('visor-dado').textContent = "DADO: --";
   historialPosiciones = {};
   nodosDescubiertosCian = {}; nodosDescubiertosAzul = {}; 
+  
   posicionesHackers["equipo-cian"] = { f: 0, c: 0, avatar: "💎", clase: "avatar-h1" };
   posicionesHackers["equipo-azul"] = { f: 20, c: 20, avatar: "🔵", clase: "avatar-h2" };
   btnIniciarPartida.classList.remove('oculto');
-  generarLaberintoProcedural();
+  
+  // Guardamos el nuevo mapa síncrono que esculpió el servidor
+  matrizLaberinto = datos.nuevoMapa;
+  
   calcularRangoRadarVision();
   dibujarLaberintoEnPantalla();
   actualizarBrilloPanelesTurnos();
-});
-
-selectorBando.addEventListener('change', (e) => { 
-  bandoAsignado = e.target.value; 
-  dibujarLaberintoEnPantalla(); 
-});
-
-// --- FUNCIÓN SEPARADA E INDEPENDIENTE PARA PINTAR MENSAJES EN PANTALLA ---
-function agregarMensajeAlCuadro(datos, claseOrigen) {
-  const div = document.createElement('div');
-  div.classList.add('mensaje', claseOrigen);
-  
-  // Aplicamos de forma obligatoria la clase de color neón asignada por el servidor
-  const colorAsignado = (datos.numColor !== undefined) ? datos.numColor : 0;
-  div.classList.add(`msg-neon-${colorAsignado}`);
-
-  // --- FILTRO DE ENCRIPCIÓN TÁCTICA CYBERPUNK ---
-  let textoFinal = datos.texto;
-
-  // Si el mensaje es de un equipo rival (y tú eres jugador), encriptamos el texto
-  if (bandoAsignado !== "espectador" && datos.clanEmisor !== "espectador" && datos.clanEmisor !== bandoAsignado) {
-    const simbolos = ["#", "$", "@", "&", "%", "*", "!", "?", "X", "Z"];
-    // Reemplazamos cada letra del mensaje enemigo por un símbolo aleatorio de hackeo
-    textoFinal = datos.texto.split('').map(() => simbolos[Math.floor(Math.random() * simbolos.length)]).join('');
-  }
-  
-  div.innerHTML = `<span class="remitente">[${datos.remitente}]:</span> <span class="cuerpo-msg">${textoFinal}</span>`;
-  mensajesChat.appendChild(div);
-  mensajesChat.scrollTop = mensajesChat.scrollHeight; // Auto-scroll al fondo
-}
-
-// =======================================================
-// --- RECEPTORES INALÁMBRICOS DE SOCKETS PARA EL CHAT ---
-// =======================================================
-
-// 1. ANTENA RECEPTORA: Escucha cuando el servidor devuelve un mensaje
-socket.on('recibir-mensaje', (datosRecibidos) => {
-  const aliasActual = entradaApodo.value.trim() || "Anon";
-  const prefijoBando = bandoAsignado === "equipo-cian" ? "💎" : (bandoAsignado === "equipo-azul" ? "🔵" : "👁️");
-  const miFirmaCompleta = `${prefijoBando} ${aliasActual}`;
-
-  // Si el mensaje es mío, se pinta a la derecha; si es del rival, a la izquierda
-  if (datosRecibidos.remitente === miFirmaCompleta) {
-    agregarMensajeAlCuadro(datosRecibidos, "yo");
-  } else {
-    agregarMensajeAlCuadro(datosRecibidos, "oponente");
-  }
-});
-
-// 2. ANTENA RECEPTORA DE MAPA: Recibe el laberinto oficial e idéntico del servidor
-socket.on('recibir-mapa-sincronizado', (datos) => {
-  console.log("¡Mapa único del servidor recibido con éxito!");
-  
-  // Guardamos el laberinto oficial en nuestra matriz local
-  matrizLaberinto = datos.mapa;
-  
-  // Calculamos los radares de la niebla de guerra y dibujamos las casillas exactas
-  calcularRangoRadarVision();
-  dibujarLaberintoEnPantalla();
-  actualizarBrilloPanelesTurnos();
+  alert("La red se ha reiniciado por completo. Volviendo a escanear nodos...");
 });
