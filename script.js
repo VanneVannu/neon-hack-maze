@@ -365,17 +365,19 @@ socket.on('servidor-confirmar-reinicios', (datos) => {
 
 
 // ==========================================
-// --- RECEPTOR INALÁMBRICO DE MENSAJES DEL CHAT ---
+// --- RECEPTOR INALÁBRICO DE MENSAJES DEL CHAT (CORREGIDO) ---
 // ==========================================
-socket.on('recibir-mensaje', (datosRecibidos) => {
+socket.on('recibir-mensaje', (datos) => {
+  console.log("Datos de chat recibidos por internet:", datos);
+
   const aliasActual = entradaApodo.value.trim() || "Anon";
   const prefijoBando = bandoAsignado === "equipo-cian" ? "💎" : (bandoAsignado === "equipo-azul" ? "🔵" : "👁️");
   const miFirmaCompleta = `${prefijoBando} ${aliasActual}`;
 
-  // Si el mensaje es mío va a la derecha, si es del rival a la izquierda
-  if (datosRecibidos.remitente === miFirmaCompleta) {
-    agregarMensajeAlCuadro(datosRecibidos, "yo");
+  // Comparamos la firma para saber si el mensaje es propio o del oponente
+  if (datos.remitente === miFirmaCompleta) {
+    agregarMensajeAlCuadro(datos, "yo");
   } else {
-    agregarMensajeAlCuadro(datosRecibidos, "oponente");
+    agregarMensajeAlCuadro(datos, "oponente");
   }
 });
