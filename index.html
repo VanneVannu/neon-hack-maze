@@ -39,33 +39,47 @@
   </div>
 
   <!-- FASE 2: LOBBY DE ESPERA Y PREPARACIÓN DE EQUIPOS (NUEVO) -->
+    <!-- FASE 2: LOBBY DE ESPERA CON CHAT INTEGRADO Y DISEÑO SIMÉTRICO -->
   <div id="pantalla-espera-slots" class="oculto">
     <div id="caja-espera-slots">
       <h2>SALA DE PREPARACIÓN DE RED</h2>
-      <p style="color: #007aff; font-size: 11px; letter-spacing: 1px;">ELICE TU SLOT DE INFILTRACIÓN TÁCTICA</p>
+      <p style="color: #007aff; font-size: 11px; letter-spacing: 1px; margin-bottom: 5px;">ELIJE TU SLOT DE INFILTRACIÓN TÁCTICA</p>
       
-      <!-- NUEVO: VISOR DE CÓDIGO INTERMEDIO COMPACTO -->
+      <!-- VISOR DE CÓDIGO INTERMEDIO COMPACTO -->
       <div style="margin: 10px 0 20px 0;">
         <span class="txt-sala-compartida-lobby" style="color: #ff007f; text-shadow: 0 0 8px #ff007f; font-weight: bold; font-family: monospace; font-size: 16px; letter-spacing: 2px;">RED: ESPERANDO...</span>
-        </div>
-      <div id="grid-slots-preparacion">
-
-      <div id="grid-slots-preparacion">
-        <!-- Lado Cian -->
-        <div class="bloque-preparacion-equipo cian">
-          <h3>EQUIPO CIAN 💎</h3>
-          <button class="btn-ocupar-slot" id="action-hacker1">OCUPAR HACKER 1</button>
-          <button class="btn-ocupar-slot" id="action-hacker3">OCUPAR HACKER 3</button>
-        </div>
-        <!-- Lado Azul -->
-        <div class="bloque-preparacion-equipo azul">
-          <h3>EQUIPO AZUL 🔵</h3>
-          <button class="btn-ocupar-slot" id="action-hacker2">OCUPAR HACKER 2</button>
-          <button class="btn-ocupar-slot" id="action-hacker4">OCUPAR HACKER 4</button>
-        </div>
       </div>
+      
+      <!-- CUERPO DISTRIBUIDO DEL LOBBY DE ESPERA -->
+      <div style="display: flex !important; flex-direction: row !important; gap: 30px !important; justify-content: center !important; align-items: flex-start !important; width: 100% !important;">
+        
+        <!-- SUB-COLUMNA IZQUIERDA: LOS DOS CLANES DE SELECCIÓN -->
+        <div id="grid-slots-preparacion" style="display: flex !important; flex-direction: row !important; gap: 20px !important; margin: 0 !important;">
+          <!-- Lado Cian -->
+          <div class="bloque-preparacion-equipo cian">
+            <h3>EQUIPO CIAN 💎</h3>
+            <button class="btn-ocupar-slot" id="action-hacker1">OCUPAR HACKER 1</button>
+            <button class="btn-ocupar-slot" id="action-hacker3">OCUPAR HACKER 3</button>
+          </div>
+          <!-- Lado Azul -->
+          <div class="bloque-preparacion-equipo azul">
+            <h3>EQUIPO AZUL 🔵</h3>
+            <button class="btn-ocupar-slot" id="action-hacker2">OCUPAR HACKER 2</button>
+            <button class="btn-ocupar-slot" id="action-hacker4">OCUPAR HACKER 4</button>
+          </div>
+        </div>
 
-      <button id="btn-iniciar-partida-lobby">ARRANCAR SECUENCIA DE HACKEO 🚀</button>
+        <!-- SUB-COLUMNA DERECHA: EL GRAN BOTÓN Y EL CONTROL DE INICIO -->
+        <div style="display: flex !important; flex-direction: column !important; gap: 20px !important; flex: 1 !important;">
+          <button id="btn-iniciar-partida-lobby">ARRANCAR SECUENCIA DE HACKEO 🚀</button>
+          
+          <p style="color: rgba(255,255,255,0.3); font-size: 10px; line-height: 1.5; margin: 0; text-align: left; font-family: monospace;">
+            [INFO]: SE REQUIERE QUE AL MENOS UN TERMINAL PIDA ACCESO PARA REVENTAR EL NÚCLEO. LOS TURNOS ROTARÁN ENTRE LOS INTEGRANTES EN LISTA EN CUANTO SE DESTRABE EL SISTEMA.
+          </p>
+        </div>
+
+      </div> <!-- FIN CUERPO DISTRIBUIDO -->
+
     </div>
   </div>
 
@@ -122,6 +136,7 @@
       </div> 
 
     </div> <!-- FIN ZONA JUEGO -->
+
   </div> <!-- FIN CONTENEDOR PRINCIPAL -->
 
   <div id="pantalla-victoria" class="oculto">
