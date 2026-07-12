@@ -444,25 +444,40 @@ body {
   transition: background-color 0.4s ease !important;
 }
 
-/* --- PALETA DE 7 COLORES NEÓN DEFINITIVA PARA EL CHAT --- */
+/* --- TRUCO DE VISIBILIDAD MÁXIMA PARA EL CHAT --- */
 .mensaje {
-  color: #ffffff !important; /* Fuerza a que todo el cuerpo del mensaje sea blanco limpio */
+  display: block !important;
+  color: #ffffff !important; /* Texto blanco brillante */
   font-family: monospace !important;
   font-size: 12px !important;
-  line-height: 1.4 !important;
-  word-break: break-word !important;
+  padding: 4px 6px !important;
+  margin-bottom: 4px !important;
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-radius: 3px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.msg-neon-0 .remitente { color: #00f0ff !important; text-shadow: 0 0 5px #00f0ff !important; } /* Cian */
-.msg-neon-1 .remitente { color: #39ff14 !important; text-shadow: 0 0 5px #39ff14 !important; } /* Verde Neón */
-.msg-neon-2 .remitente { color: #ffff00 !important; text-shadow: 0 0 5px #ffff00 !important; } /* Amarillo Neón */
-.msg-neon-3 .remitente { color: #ff9900 !important; text-shadow: 0 0 5px #ff9900 !important; } /* Naranja Neón */
-.msg-neon-4 .remitente { color: #cc00ff !important; text-shadow: 0 0 5px #cc00ff !important; } /* Morado Neón */
-.msg-neon-5 .remitente { color: #00ffcc !important; text-shadow: 0 0 5px #00ffcc !important; } /* Menta Neón */
-.msg-neon-6 .remitente { color: #ff007f !important; text-shadow: 0 0 5px #ff007f !important; } /* Fucsia Neón */
+.msg-neon-0 .remitente { color: #00f0ff !important; text-shadow: 0 0 5px #00f0ff !important; } 
+.msg-neon-1 .remitente { color: #39ff14 !important; text-shadow: 0 0 5px #39ff14 !important; } 
+.msg-neon-2 .remitente { color: #ffff00 !important; text-shadow: 0 0 5px #ffff00 !important; } 
+.msg-neon-3 .remitente { color: #ff9900 !important; text-shadow: 0 0 5px #ff9900 !important; } 
+.msg-neon-4 .remitente { color: #cc00ff !important; text-shadow: 0 0 5px #cc00ff !important; } 
+.msg-neon-5 .remitente { color: #00ffcc !important; text-shadow: 0 0 5px #00ffcc !important; } 
+.msg-neon-6 .remitente { color: #ff007f !important; text-shadow: 0 0 5px #ff007f !important; } 
 
-/* Estilo estético para el texto encriptado o normal del mensaje */
 .cuerpo-msg {
   color: #ffffff !important;
-  margin-left: 5px !important;
+  font-weight: normal !important;
+}
+
+/* Estilo para los nombres reales dentro de la lista de miembros */
+.nombre-slot {
+  color: #00f0ff !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px #00f0ff;
+}
+#panel-equipo-azul .nombre-slot {
+  color: #ff007f !important;
+  text-shadow: 0 0 3px #ff007f;
 }
