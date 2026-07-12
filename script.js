@@ -68,11 +68,10 @@ function entrarAlJuego(codigoSala) {
   contenedorPrincipal.classList.remove('oculto');
   txtSalaActual.textContent = codigoSala.toUpperCase();
   
-  // Nombres simulados provisionales para ver los paneles laterales
-  document.querySelector('#slot-cian-1 .nombre-slot').textContent = "HackerAlfa";
-  document.querySelector('#slot-cian-2 .nombre-slot').textContent = "HackerBeta";
-  document.querySelector('#slot-azul-1 .nombre-slot').textContent = "HackerGama";
-  document.querySelector('#slot-azul-2 .nombre-slot').textContent = "HackerDelta";
+  const miAliasEscrito = entradaApodo.value.trim() || "Anon";
+
+  // MODIFICADO: Enviamos un objeto completo al servidor con código y alias real
+  socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 
   generarLaberintoProcedural();
   calcularRangoRadarVision(); 
@@ -463,6 +462,26 @@ socket.on('recibir-mensaje', (datosRecibidos) => {
     agregarMensajeAlCuadro(datosRecibidos, "yo");
   } else {
     agregarMensajeAlCuadro(datosRecibidos, "oponente");
+  }
+});
+
+// 1. ANTENA RECEPTORA MULTIJUGADOR: Sincroniza la lista de integrantes en los paneles
+socket.on('actualizar-lista-integrantes', (datosSala) => {
+  console.log("Lista de integrantes actualizada por red:", datosSala);
+  
+  // Inyectamos los apodos reales dentro de las ranuras correspondientes
+  document.querySelector('#slot-cian-1 .nombre-slot').textContent = datosSala.n1;
+  document.querySelector('#slot-azul-1 .nombre-slot').textContent = datosSala.n2;
+  document.querySelector('#slot-cian-2 .nombre-slot').textContent = datosSala.n3;
+  document.querySelector('#slot-azul-2 .nombre-slot').textContent = datosSala.n4;
+
+  // Si el servidor nos asignó un slot de juego, configuramos nuestro bando automático
+  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador") {
+    // Los slots 1 y 3 pertenecen al Clan Cian, el 2 y 4 al Clan Azul
+    const miClanAsignado = (datosSala.tuSlot === "hacker1" || datosSala.tuSlot === "hacker3") ? "equipo-cian" : "equipo-azul";
+    bandoAsignado = miClanAsignado;
+    selectorBando.value = miClanAsignado; // Cambia el menú desplegable automáticamente
+    dibujarLaberintoEnPantalla(); // Actualiza el radar según tu nuevo equipo
   }
 });
 
