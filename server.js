@@ -12,10 +12,11 @@ app.use(express.static(path.join(__dirname)));
 // Base de datos temporal en la memoria RAM para registrar las salas privadas activas
 let redesOcupadas = {};
 
+// === EL GRAN CONECTOR GENERAL (TODO DEBE VIVIR AQUÍ ADENTRO) ===
 io.on('connection', (socket) => {
   console.log(`[CONEXIÓN]: Nuevo terminal enlazado al sistema -> ID: ${socket.id}`);
 
-// --- 1. ACCEDER A LA RED PRIVADA Y CONSTRUIR MAPA CENTRALIZADO ---
+  // --- 1. ACCEDER A LA RED PRIV PRIVADA Y CONSTRUIR MAPA CENTRALIZADO ---
   socket.on('unirse-a-sala', (datosDeEntrada) => {
     const codigoSala = datosDeEntrada.sala || datosDeEntrada;
     const apodoReal = datosDeEntrada.apodo || "Anon";
@@ -25,17 +26,17 @@ io.on('connection', (socket) => {
     socket.join(codigoSala); 
 
     if (!redesOcupadas[codigoSala]) {
-      // 1. Crear el objeto de la sala en el servidor
+      // Crear el objeto de la sala en el servidor si es nueva
       redesOcupadas[codigoSala] = {
         hacker1: null, nombreH1: "Esperando...",
         hacker2: null, nombreH2: "Esperando...",
         hacker3: null, nombreH3: "Esperando...",
         hacker4: null, nombreH4: "Esperando...",
         contadorColor: 0,
-        mapaUnicoServidor: [] // <-- AQUÍ SE GUARDARÁ EL LABERINTO OFICIAL
+        mapaUnicoServidor: [] 
       };
       
-      // 2. ¡EL SERVIDOR ESCULPE EL LABERINTO MATEMÁTICO ÚNICO!
+      // EL SERVIDOR ESCULPE EL LABERINTO MATEMÁTICO ÚNICO DE 21X21
       const TAM = 21;
       let matriz = [];
       for (let f = 0; f < TAM; f++) {
@@ -72,13 +73,12 @@ io.on('connection', (socket) => {
       for (let f = 0; f <= 1; f++) { for (let c = 0; c <= 1; c++) { matriz[f][c] = 0; } }
       for (let f = TAM - 2; f < TAM; f++) { for (let c = TAM - 2; c < TAM; c++) { matriz[f][c] = 0; } }
       
-      // Guardamos la matriz definitiva en la memoria del servidor para esa sala
       redesOcupadas[codigoSala].mapaUnicoServidor = matriz;
     }
 
     let red = redesOcupadas[codigoSala];
 
-    // Asignación de ranuras (Mismo código de antes)
+    // Asignación de ranuras automáticas por orden de llegada al nodo
     if (red.hacker1 === null) { red.hacker1 = socket.id; red.nombreH1 = apodoReal; socket.miSlotAsignado = "hacker1"; }
     else if (red.hacker2 === null) { red.hacker2 = socket.id; red.nombreH2 = apodoReal; socket.miSlotAsignado = "hacker2"; }
     else if (red.hacker3 === null) { red.hacker3 = socket.id; red.nombreH3 = apodoReal; socket.miSlotAsignado = "hacker3"; }
@@ -88,31 +88,29 @@ io.on('connection', (socket) => {
     socket.miNumeroColor = red.contadorColor % 7;
     red.contadorColor++;
 
-    // NUEVO: Le enviamos a este jugador la lista de integrantes Y el mapa oficial del servidor
+    // 1. Le enviamos el mapa idéntico del servidor exclusivamente al jugador que acaba de entrar
     socket.emit('recibir-mapa-sincronizado', { mapa: red.mapaUnicoServidor });
 
+    // 2. Le avisamos a TODOS en la sala cómo quedó la lista de integrantes conectada
     io.to(codigoSala).emit('actualizar-lista-integrantes', {
       n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4,
       tuSlot: socket.miSlotAsignado
     });
+
+    console.log(`[NODO]: ${apodoReal} asignado al slot ${socket.miSlotAsignado} en la sala ${codigoSala}`);
   });
-
-
 
   // --- 2. CANAL DE COMUNICACIÓN (CHAT MULTICOLOR) ---
   socket.on('enviar-mensaje', (datosMensaje) => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
-      // Le inyectamos el color neón asignado al mensaje antes de retransmitirlo
       datosMensaje.numColor = socket.miNumeroColor;
-      
-      // Emitimos a todos los terminales enlazados a ese mismo nodo de acceso
       io.to(redNombre).emit('recibir-mensaje', datosMensaje);
     }
   });
 
-  // --- 3. DESCONEXIÓN DEL TERMINAL ---
-    socket.on('disconnect', () => {
+  // --- 3. DESCONEXIÓN LIMPIA DE SLOTS ---
+  socket.on('disconnect', () => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
       let red = redesOcupadas[redNombre];
@@ -125,31 +123,11 @@ io.on('connection', (socket) => {
         n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4
       });
     }
+    console.log(`[DESCONEXIÓN]: Terminal desconectado -> ID: ${socket.id}`);
   });
-
 });
 
-// Encender los motores del servidor de internet
+// Encender los motores del servidor
 http.listen(PORT, () => {
   console.log(`[SERVIDOR]: NeonHackMaze operativo en puerto de red -> ${PORT}`);
-});
-
-// 1. ANTENA RECEPTORA MULTIJUGADOR: Sincroniza la lista de integrantes en los paneles
-socket.on('actualizar-lista-integrantes', (datosSala) => {
-  console.log("Lista de integrantes actualizada por red:", datosSala);
-  
-  // Inyectamos los apodos reales dentro de las ranuras correspondientes
-  document.querySelector('#slot-cian-1 .nombre-slot').textContent = datosSala.n1;
-  document.querySelector('#slot-azul-1 .nombre-slot').textContent = datosSala.n2;
-  document.querySelector('#slot-cian-2 .nombre-slot').textContent = datosSala.n3;
-  document.querySelector('#slot-azul-2 .nombre-slot').textContent = datosSala.n4;
-
-  // Si el servidor nos asignó un slot de juego, configuramos nuestro bando automático
-  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador") {
-    // Los slots 1 y 3 pertenecen al Clan Cian, el 2 y 4 al Clan Azul
-    const miClanAsignado = (datosSala.tuSlot === "hacker1" || datosSala.tuSlot === "hacker3") ? "equipo-cian" : "equipo-azul";
-    bandoAsignado = miClanAsignado;
-    selectorBando.value = miClanAsignado; // Cambia el menú desplegable automáticamente
-    dibujarLaberintoEnPantalla(); // Actualiza el radar según tu nuevo equipo
-  }
 });
