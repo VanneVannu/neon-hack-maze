@@ -212,6 +212,7 @@ function rotarTurnoElectronico() {
 }
 
 function actualizarBrilloPanelesTurnos() {
+  // Limpiamos la luz neón de las 4 ranuras laterales
   document.getElementById('slot-cian-1').classList.remove('turno-activo');
   document.getElementById('slot-cian-2').classList.remove('turno-activo');
   document.getElementById('slot-azul-1').classList.remove('turno-activo');
@@ -219,13 +220,16 @@ function actualizarBrilloPanelesTurnos() {
 
   const hackerIdActivo = ordenTurnos[indiceTurnoActual];
   
+  // Encendemos el neón únicamente en el slot que le toca hackear
   if (hackerIdActivo === "hacker1") document.getElementById('slot-cian-1').classList.add('turno-activo');
   if (hackerIdActivo === "hacker3") document.getElementById('slot-cian-2').classList.add('turno-activo');
   if (hackerIdActivo === "hacker2") document.getElementById('slot-azul-1').classList.add('turno-activo');
   if (hackerIdActivo === "hacker4") document.getElementById('slot-azul-2').classList.add('turno-activo');
 
-  bandoActualTxt.textContent = ordenTurnos[indiceTurnoActual].toUpperCase().replace("HACKER", "HACKER ");
+  // Cambiar el letrero superior de la barra de forma limpia
+  bandoActualTxt.textContent = hackerIdActivo.toUpperCase().replace("HACKER", "HACKER ");
 }
+
 
 // --- ESCUCHAS DE BOTONES DE BARRA DE CONTROL ---
 btnTirarDado.addEventListener('click', () => {
@@ -271,18 +275,21 @@ socket.on('recibir-mapa-sincronizado', (datos) => {
 });
 
 socket.on('actualizar-lista-integrantes', (datosSala) => {
+  // 1. Sincronizar los apodos en los cuadros laterales
   document.querySelector('#slot-cian-1 .nombre-slot').textContent = datosSala.n1;
   document.querySelector('#slot-azul-1 .nombre-slot').textContent = datosSala.n2;
   document.querySelector('#slot-cian-2 .nombre-slot').textContent = datosSala.n3;
   document.querySelector('#slot-azul-2 .nombre-slot').textContent = datosSala.n4;
 
-  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador") {
+  // 2. CORREGIDO: Solo te asigna equipo de forma estática la PRIMERA VEZ que entras de lobby
+  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador" && bandoAsignado === "espectador") {
     const miClanAsignado = (datosSala.tuSlot === "hacker1" || datosSala.tuSlot === "hacker3") ? "equipo-cian" : "equipo-azul";
     bandoAsignado = miClanAsignado;
-    selectorBando.value = miClanAsignado;
+    selectorBando.value = miClanAsignado; // Fija tu menú desplegable de forma permanente
     dibujarLaberintoEnPantalla();
   }
 });
+
 
 socket.on('servidor-retransmitir-dado', (datos) => {
   dadoLanzadoEsteTurno = true;
@@ -354,4 +361,21 @@ socket.on('servidor-confirmar-reinicios', (datos) => {
   dibujarLaberintoEnPantalla();
   actualizarBrilloPanelesTurnos();
   alert("La red se ha reiniciado por completo.");
+});
+
+
+// ==========================================
+// --- RECEPTOR INALÁMBRICO DE MENSAJES DEL CHAT ---
+// ==========================================
+socket.on('recibir-mensaje', (datosRecibidos) => {
+  const aliasActual = entradaApodo.value.trim() || "Anon";
+  const prefijoBando = bandoAsignado === "equipo-cian" ? "💎" : (bandoAsignado === "equipo-azul" ? "🔵" : "👁️");
+  const miFirmaCompleta = `${prefijoBando} ${aliasActual}`;
+
+  // Si el mensaje es mío va a la derecha, si es del rival a la izquierda
+  if (datosRecibidos.remitente === miFirmaCompleta) {
+    agregarMensajeAlCuadro(datosRecibidos, "yo");
+  } else {
+    agregarMensajeAlCuadro(datosRecibidos, "oponente");
+  }
 });
