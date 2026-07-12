@@ -10,7 +10,7 @@ app.use(express.static(path.join(__dirname)));
 
 let redesOcupadas = {};
 
-// FUNCIÓN REUTILIZABLE PARA CREAR EL LABERINTO SIN DUPLICAR CÓDIGO
+// FUNCIÓN GENERADORA DEL LABERINTO PROCEDURAL 21X21
 function esculpirLaberintoMatematico() {
   const TAM = 21;
   let matriz = [];
@@ -55,9 +55,11 @@ function esculpirLaberintoMatematico() {
   return matriz;
 }
 
+// === CONECTOR CENTRAL DE RED DE INTERNET ===
 io.on('connection', (socket) => {
-  console.log(`[CONEXIÓN]: ID: ${socket.id}`);
+  console.log(`[CONEXIÓN]: Terminal enlazado -> ID: ${socket.id}`);
 
+  // --- 1. ACCEDER AL NODO DE RED PRIVADO ---
   socket.on('unirse-a-sala', (datosDeEntrada) => {
     const codigoSala = datosDeEntrada.sala || datosDeEntrada;
     const apodoReal = datosDeEntrada.apodo || "Anon";
@@ -68,46 +70,61 @@ io.on('connection', (socket) => {
 
     if (!redesOcupadas[codigoSala]) {
       redesOcupadas[codigoSala] = {
-        hacker1: null, nombreH1: "Esperando...",
-        hacker2: null, nombreH2: "Esperando...",
-        hacker3: null, nombreH3: "Esperando...",
-        hacker4: null, nombreH4: "Esperando...",
+        hacker1: null, nombreH1: null,
+        hacker2: null, nombreH2: null,
+        hacker3: null, nombreH3: null,
+        hacker4: null, nombreH4: null,
         contadorColor: 0,
-        mapaUnicoServidor: esculpirLaberintoMatematico() // Genera el primer mapa
+        mapaUnicoServidor: esculpirLaberintoMatematico()
       };
     }
 
     let red = redesOcupadas[codigoSala];
 
-    if (red.hacker1 === null) { red.hacker1 = socket.id; red.nombreH1 = apodoReal; socket.miSlotAsignado = "hacker1"; }
-    else if (red.hacker2 === null) { red.hacker2 = socket.id; red.nombreH2 = apodoReal; socket.miSlotAsignado = "hacker2"; }
-    else if (red.hacker3 === null) { red.hacker3 = socket.id; red.nombreH3 = apodoReal; socket.miSlotAsignado = "hacker3"; }
-    else if (red.hacker4 === null) { red.hacker4 = socket.id; red.nombreH4 = apodoReal; socket.miSlotAsignado = "hacker4"; }
-    else { socket.miSlotAsignado = "espectador"; }
-
     socket.miNumeroColor = red.contadorColor % 7;
     red.contadorColor++;
 
-    //socket.emit('recibir-mapa-sincronizado', { mapa: red.mapaUnicoServidor });
+    // Despachar el mapa de inmediato al terminal
+    socket.emit('recibir-mapa-sincronizado', { mapa: red.mapaUnicoServidor });
 
-    io.to(codigoSala).emit('actualizar-lista-integrantes', {
-      n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4,
-      tuSlot: socket.miSlotAsignado
+    // Informar el estado actual de los 4 slots de preparación para pintar los botones
+    socket.emit('actualizar-slots-preparacion', {
+      hacker1: red.nombreH1, hacker2: red.nombreH2, hacker3: red.nombreH3, hacker4: red.nombreH4
     });
-
-       console.log(`[NODO]: ${apodoReal} asignado al slot ${socket.miSlotAsignado} en la sala ${codigoSala}`);
-    }); // <-- AQUÍ SE CIERRA EL EVENTO DE UNIRSE A SALA
-
-    // --- NUEVA ANTENA CONTROLADORA: PIDE EL MAPA CUANDO LA PÁGINA YA CARGÓ ---
-    socket.on('solicitar-mapa-inicial', () => {
-    const redNombre = socket.miRedActual;
-    if (redNombre && redesOcupadas[redNombre]) {
-      // Enviamos el mapa oficial directo al terminal que lo solicitó
-      socket.emit('recibir-mapa-sincronizado', { mapa: redesOcupadas[redNombre].mapaUnicoServidor });
-    }
-
   });
 
+  // --- 2. NUEVO: APARTAR Y BLOQUEAR RANURA DE INFILTRACIÓN SELECCIONADA ---
+  socket.on('solicitar-ocupar-slot-servidor', (datos) => {
+    const redNombre = socket.miRedActual;
+    if (!redNombre || !redesOcupadas[redNombre]) return;
+
+    let red = redesOcupadas[redNombre];
+    const slotPedido = datos.slot; // "hacker1", "hacker2", etc.
+    const clanPedido = datos.clan; // "equipo-cian", "equipo-azul"
+
+    // Validamos que el slot esté verdaderamente vacío en el servidor
+    if (red[slotPedido] === null) {
+      // Registramos el ID y el apodo del Hacker en la memoria RAM
+      red[slotPedido] = socket.id;
+      
+      if (slotPedido === "hacker1") red.nombreH1 = socket.miApodoEnRed;
+      if (slotPedido === "hacker2") red.nombreH2 = socket.miApodoEnRed;
+      if (slotPedido === "hacker3") red.nombreH3 = socket.miApodoEnRed;
+      if (slotPedido === "hacker4") red.nombreH4 = socket.miApodoEnRed;
+
+      socket.miSlotOcupadoFisico = slotPedido;
+
+      // 1. Confirmar de forma privada al jugador que su bando ha sido asegurado
+      socket.emit('confirmar-tu-slot-asignado', { slot: slotPedido, clan: clanPedido });
+
+      // 2. Retransmitir a TODOS el nuevo mapa de botones verdes neón ocupados
+      io.to(redNombre).emit('actualizar-slots-preparacion', {
+        hacker1: red.nombreH1, hacker2: red.nombreH2, hacker3: red.nombreH3, hacker4: red.nombreH4
+      });
+    }
+  });
+
+  // --- 3. CANAL DE COMUNICACIÓN (CHAT MULTICOLOR ENCRIPTADO) ---
   socket.on('enviar-mensaje', (datosMensaje) => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
@@ -116,6 +133,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // --- 4. ACCIONES DE JUEGO MULTIJUGADOR ---
   socket.on('solicitar-lanzamiento-dado', (datosDado) => {
     if (socket.miRedActual) io.to(socket.miRedActual).emit('servidor-retransmitir-dado', datosDado);
   });
@@ -131,25 +149,42 @@ io.on('connection', (socket) => {
   socket.on('solicitar-reiniciar-red', () => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
-      // Esculpimos una revancha limpia usando la función optimizada
-      redesOcupadas[redNombre].mapaUnicoServidor = esculpirLaberintoMatematico();
-      io.to(redNombre).emit('servidor-confirmar-reinicios', { nuevoMapa: redesOcupadas[redNombre].mapaUnicoServidor });
+      let red = redesOcupadas[redNombre];
+      
+      // Vaciamos los slots del servidor para obligar a re-elegir bando en la revancha
+      red.hacker1 = null; red.nombreH1 = null;
+      red.hacker2 = null; red.nombreH2 = null;
+      red.hacker3 = null; red.nombreH3 = null;
+      red.hacker4 = null; red.nombreH4 = null;
+      red.mapaUnicoServidor = esculpirLaberintoMatematico();
+
+      io.to(redNombre).emit('servidor-confirmar-reinicios', { nuevoMapa: red.mapaUnicoServidor });
     }
   });
 
+  // --- 5. DESCONEXIÓN LIMPIA DE TERMINALES ---
   socket.on('disconnect', () => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
       let red = redesOcupadas[redNombre];
-      if (red.hacker1 === socket.id) { red.hacker1 = null; red.nombreH1 = "Esperando..."; }
-      if (red.hacker2 === socket.id) { red.hacker2 = null; red.nombreH2 = "Esperando..."; }
-      if (red.hacker3 === socket.id) { red.hacker3 = null; red.nombreH3 = "Esperando..."; }
-      if (red.hacker4 === socket.id) { red.hacker4 = null; red.nombreH4 = "Esperando..."; }
-      io.to(redNombre).emit('actualizar-lista-integrantes', {
-        n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4
-      });
+      const slot = socket.miSlotOcupadoFisico;
+
+      if (slot) {
+        red[slot] = null;
+        if (slot === "hacker1") red.nombreH1 = null;
+        if (slot === "hacker2") red.nombreH2 = null;
+        if (slot === "hacker3") red.nombreH3 = null;
+        if (slot === "hacker4") red.nombreH4 = null;
+
+        io.to(redNombre).emit('actualizar-slots-preparacion', {
+          hacker1: red.nombreH1, hacker2: red.nombreH2, hacker3: red.nombreH3, hacker4: red.nombreH4
+        });
+      }
     }
+    console.log(`[DESCONEXIÓN]: Terminal liberado -> ID: ${socket.id}`);
   });
 });
 
-http.listen(PORT, () => { console.log(`NeonHackMaze activo en puerto -> ${PORT}`); });
+http.listen(PORT, () => {
+  console.log(`[SERVIDOR]: NeonHackMaze operativo en puerto -> ${PORT}`);
+});
