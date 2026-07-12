@@ -73,6 +73,9 @@ function entrarAlJuego(codigoSala) {
   // MODIFICADO: Enviamos un objeto completo al servidor con código y alias real
   socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 
+  // --- NUEVA LÍNEA: AVISAR AL SERVIDOR QUE YA ESTAMOS LISTOS PARA RECIBIR EL LABERINTO ---
+  socket.emit('solicitar-mapa-inicial');
+  
 }
 
 
@@ -446,3 +449,4 @@ socket.on('servidor-confirmar-reinicios', (datos) => {
   actualizarBrilloPanelesTurnos();
   alert("La red se ha reiniciado por completo. Volviendo a escanear nodos...");
 });
+
