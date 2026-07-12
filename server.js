@@ -109,6 +109,57 @@ io.on('connection', (socket) => {
     }
   });
 
+    // --- 3. NUEVO: CENTRALIZAR EL LANZAMIENTO DEL DADO TÁCTICO ---
+  socket.on('solicitar-lanzamiento-dado', (datosDado) => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      // Retransmitimos el resultado del dado y los pasos a todos en la sala
+      io.to(redNombre).emit('servidor-retransmitir-dado', datosDado);
+    }
+  });
+
+  // --- 4. NUEVO: RETRANSMITIR MOVIMIENTO DE AVATARES ---
+  socket.on('solicitar-movimiento-hacker', (datosMovimiento) => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      // Retransmitimos las nuevas coordenadas del avatar a todas las pantallas
+      io.to(redNombre).emit('servidor-retransmitir-movimiento', datosMovimiento);
+    }
+  });
+
+  // --- 5. NUEVO: SINCRONIZAR BOTONES DE INICIAR Y REINICIAR PARTIDA ---
+  socket.on('solicitar-inicio-partida', (datosSorteo) => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      io.to(redNombre).emit('servidor-confirmar-inicio', datosSorteo);
+    }
+  });
+
+  socket.on('solicitar-reiniciar-red', () => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      // Al reiniciar, esculpimos un mapa completamente nuevo en el servidor para la revancha
+      const TAM = 21;
+      let matriz = [];
+      for (let f = 0; f < TAM; f++) { matriz[f] = []; for (let c = 0; c < TAM; c++) { matriz[f][c] = 1; } }
+      let pila = []; let fActual = 0, cActual = 0; matriz[fActual][cActual] = 0;
+      while (true) {
+        let vecinos = []; const direcciones = [{ df: -2, dc: 0 }, { df: 2, dc: 0 }, { df: 0, dc: -2 }, { df: 0, dc: 2 }];
+        direcciones.forEach(d => { let nvF = fActual + d.df, nvC = cActual + d.dc; if (nvF >= 0 && nvF < TAM && nvC >= 0 && nvC < TAM) { if (matriz[nvF][nvC] === 1) vecinos.push({ f: nvF, c: nvC, df: d.df, dc: d.dc }); } });
+        if (vecinos.length > 0) { let elegido = vecinos[Math.floor(Math.random() * vecinos.length)]; matriz[fActual + elegido.df / 2][cActual + elegido.dc / 2] = 0; matriz[elegido.f][elegido.c] = 0; pila.push({ f: fActual, c: cActual }); fActual = elegido.f; cActual = elegido.c; } else if (pila.length > 0) { let anterior = pila.pop(); fActual = anterior.f; cActual = anterior.c; } else { break; }
+      }
+      const centro = Math.floor(TAM / 2); matriz[centro][centro] = 2; matriz[centro-1][centro] = 0; matriz[centro+1][centro] = 0; matriz[centro][centro-1] = 0; matriz[centro][centro+1] = 0;
+      for (let f = 0; f <= 1; f++) { for (let c = 0; c <= 1; c++) { matriz[f][c] = 0; } }
+      for (let f = TAM - 2; f < TAM; f++) { for (let c = TAM - 2; c < TAM; c++) { matriz[f][c] = 0; } }
+      
+      redesOcupadas[redNombre].mapaUnicoServidor = matriz;
+
+      // Despachamos la orden de limpieza y el nuevo mapa a todos a la vez
+      io.to(redNombre).emit('servidor-confirmar-reinicios', { nuevoMapa: matriz });
+    }
+  });
+
+
   // --- 3. DESCONEXIÓN LIMPIA DE SLOTS ---
   socket.on('disconnect', () => {
     const redNombre = socket.miRedActual;
