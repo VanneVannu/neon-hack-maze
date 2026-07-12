@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeonHackMaze</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <!-- LOBBY DE BIENVENIDA -->
+  <div id="pantalla-lobby">
+    <div class="caja-lobby">
+      <h1>NEON HACK MAZE</h1>
+      <p>INFILTRACIÓN TÁCTICA EN TIEMPO REAL</p>
+      
+      <button id="btn-crear-codigo-sala">CREAR RED PRIVADA 🎲</button>
+      <div class="divisor-lobby"><span>Ó CONÉCTATE A UN NODO</span></div>
+
+      <div class="control-grupo-lobby">
+        <label for="entrada-sala">CÓDIGO DE RED:</label>
+        <input type="text" id="entrada-sala" placeholder="Introduce las 5 letras..." autocomplete="off">
+      </div>
+      
+      <button id="btn-entrar-sala">ACCEDER AL SISTEMA ➤</button>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DEL JUEGO (Inicia oculto) -->
+  <div id="contenedor-principal" class="oculto">
+    
+    <!-- BARRA SUPERIOR DE HERRAMIENTAS -->
+    <div id="interfaz">
+      <div id="marcador-turno">
+        Turno: <span id="bando-actual">HACKER 1</span>
+      </div>
+      
+      <div id="contenedor-controles">
+        <input type="text" id="entrada-apodo" placeholder="Tu Alias (Ej: Anon)" value="Anon" maxlength="15" autocomplete="off">
+
+        <select id="selector-bando">
+          <option value="espectador">Espectador 👁️</option>
+          <option value="equipo-cian">Equipo Cian 💎</option>
+          <option value="equipo-azul">Equipo Azul 🔵</option>
+        </select>
+
+        <button id="btn-iniciar-partida">Iniciar Hackeo</button>
+        <button id="btn-reiniciar">Reiniciar Red</button>
+      </div>
+    </div>
+
+    <!-- ZONA CENTRAL DE JUEGO -->
+    <!-- ZONA CENTRAL DE JUEGO (REESTRUCTURADA ASIMÉTRICAMENTE) -->
+    <!-- ZONA CENTRAL DE JUEGO EVOLUCIONADA -->
+  <div id="zona-juego">
+    
+    <!-- COLUMNA IZQUIERDA: CHAT Y PANEL CIAN -->
+    <div class="columna-lateral-izquierda">
+      <!-- Chat (Se queda igual) -->
+      <div id="contenedor-chat">
+        <div id="titulo-chat">CANAL DE COMUNICACIÓN</div>
+        <div id="mensajes-chat"></div>
+        <div id="formulario-chat">
+          <input type="text" id="entrada-mensaje" placeholder="Escribe un mensaje..." autocomplete="off">
+          <button id="btn-enviar-chat">➤</button>
+        </div>
+      </div>
+
+      <!-- NUEVO: Panel de integrantes del Equipo Cian -->
+      <div class="panel-equipo" id="panel-equipo-cian">
+        <div class="titulo-equipo cian">EQUIPO CIAN 💎</div>
+        <div class="lista-miembros">
+          <div class="miembro-linea" id="slot-cian-1">HACKER 1: <span class="nombre-slot">Esperando...</span></div>
+          <div class="miembro-linea" id="slot-cian-2">HACKER 3: <span class="nombre-slot">Esperando...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENEDOR CENTRAL DEL LABERINTO -->
+    <div id="contenedor-laberinto">
+      <div id="tablero-laberinto">
+        <!-- Las casillas se generan dinámicamente con JS -->
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: NODO, DADO Y PANEL AZUL -->
+    <div class="columna-lateral-derecha">
+      <!-- Nodo de Acceso (Se queda igual) -->
+      <div id="contenedor-codigo-lateral">
+        <div id="titulo-codigo-lateral">NODO DE ACCESO</div>
+        <div id="caja-codigo-texto">
+          <span id="txt-sala-actual">ESPERANDO RED...</span>
+        </div>
+      </div> 
+
+      <!-- Módulo del Dado (Se queda igual) -->
+      <div id="modulo-dado-lateral">
+        <button id="btn-tirar-dado">EJECUTAR DADO 🎲</button>
+        <div id="zona-dado-visual"><div id="cubo-neon-dado">--</div></div>
+        <div id="visor-accion-sistema">ESPERANDO INICIO...</div>
+      </div>
+
+      <!-- NUEVO: Panel de integrantes del Equipo Azul -->
+      <div class="panel-equipo" id="panel-equipo-azul">
+        <div class="titulo-equipo azul">EQUIPO AZUL 🔵</div>
+        <div class="lista-miembros">
+          <div class="miembro-linea" id="slot-azul-1">HACKER 2: <span class="nombre-slot">Esperando...</span></div>
+          <div class="miembro-linea" id="slot-azul-2">HACKER 4: <span class="nombre-slot">Esperando...</span></div>
+        </div>
+      </div>
+    </div> 
+
+  </div> <!-- FIN ZONA JUEGO -->
+
+</div> <!-- FIN CONTENEDOR PRINCIPAL -->
+
+<!-- Pantalla de Jaque Mate / Victoria heredada del ajedrez (Oculta por defecto) -->
+<div id="pantalla-victoria" class="oculto">
+  <h2>¡SISTEMA COMPROMETIDO!</h2>
+  <p id="mensaje-ganador">Infiltración exitosa</p>
+</div>
+
+<!-- Tus antenas y librerías inalámbricas -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

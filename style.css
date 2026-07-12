@@ -1,0 +1,445 @@
+/* --- CONFIGURACIÓN GENERAL CYBERPUNK --- */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #05050d;
+  font-family: 'Courier New', Courier, monospace;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* PANTALLA LOBBY */
+#pantalla-lobby {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: #05050d;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+}
+
+.caja-lobby {
+  background-color: rgba(0, 240, 255, 0.02);
+  border: 2px solid #00f0ff;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+  max-width: 400px; width: 90%;
+}
+
+.caja-lobby h1 {
+  color: #00f0ff;
+  text-shadow: 0 0 10px #00f0ff;
+  margin-bottom: 5px;
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+
+.caja-lobby p {
+  color: #007aff;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 5px #007aff;
+}
+
+#btn-crear-codigo-sala {
+  background-color: transparent;
+  border: 2px solid #ff007f;
+  border-radius: 4px;
+  color: #ff007f;
+  font-weight: bold;
+  padding: 12px 25px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+  width: 100%;
+  transition: all 0.2s ease;
+  letter-spacing: 1px;
+}
+
+#btn-crear-codigo-sala:hover {
+  background-color: #ff007f;
+  color: #000;
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
+}
+
+.divisor-lobby {
+  display: flex; align-items: center; text-align: center;
+  margin: 20px 0; color: rgba(0, 240, 255, 0.4);
+  font-size: 10px; letter-spacing: 2px;
+}
+
+.divisor-lobby::before, .divisor-lobby::after {
+  content: ''; flex: 1; border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+.divisor-lobby:not(:empty)::before { margin-right: .5em; }
+.divisor-lobby:not(:empty)::after { margin-left: .5em; }
+
+.control-grupo-lobby {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; text-align: left;
+}
+
+.control-grupo-lobby label { color: #00f0ff; font-size: 11px; font-weight: bold; }
+
+#entrada-sala {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid #0055ff; border-radius: 4px;
+  color: #fff; padding: 12px; font-size: 15px; outline: none;
+  font-family: monospace;
+}
+
+#btn-entrar-sala {
+  background-color: #007aff; color: #fff; border: none; border-radius: 4px;
+  padding: 12px 25px; font-size: 14px; font-weight: bold; cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 122, 255, 0.4); width: 100%;
+}
+
+/* INTERFAZ DEL JUEGO */
+#interfaz {
+  display: flex !important; flex-direction: row !important;
+  align-items: center !important; justify-content: center !important;
+  gap: 40px !important; padding: 15px 0 !important;
+  border-bottom: 1px solid rgba(0, 122, 255, 0.2);
+}
+
+#contenedor-controles { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 20px !important; }
+
+#marcador-turno { color: #00f0ff; text-shadow: 0 0 5px #00f0ff; font-size: 13px; font-weight: bold; }
+
+#entrada-apodo, #selector-bando, #btn-iniciar-partida, #btn-reiniciar {
+  height: 38px !important; box-sizing: border-box !important; margin: 0 !important; font-size: 13px !important;
+  background-color: rgba(0, 0, 0, 0.5) !important; border: 1px solid #0055ff !important;
+  border-radius: 4px !important; color: #fff !important; padding: 0 10px !important; outline: none !important;
+  font-family: monospace;
+}
+
+#btn-iniciar-partida { background-color: #39ff14 !important; color: #000 !important; font-weight: bold !important; border: none !important; }
+#btn-reiniciar { background-color: #ff007f !important; color: #fff !important; font-weight: bold !important; border: none !important; }
+
+/* ZONA DE JUEGO Y LABERINTO */
+#zona-juego {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 25px !important; /* Espaciado simétrico entre bloques */
+  padding: 25px !important;
+  max-width: 1400px !important; /* Ampliamos el espacio horizontal */
+  margin: 0 auto !important;
+}
+
+#contenedor-laberinto {
+  background-color: #020206;
+  border: 2px solid #0055ff;
+  box-shadow: 0 0 20px rgba(0, 85, 255, 0.2);
+  padding: 10px; border-radius: 6px;
+}
+
+/* EL TABLERO MATRIZ */
+/* --- ACTUALIZADO: MATRIZ DE 21x21 COMPACTA Y SIMÉTRICA --- */
+#tablero-laberinto {
+  display: grid !important;
+  grid-template-columns: repeat(21, 24px) !important; /* Encogemos las casillas de 32px a 24px */
+  grid-template-rows: repeat(21, 24px) !important;
+  gap: 2px !important;
+}
+
+.celda {
+  background-color: rgba(0, 122, 255, 0.03);
+  border: 1px solid rgba(0, 240, 255, 0.04);
+  cursor: pointer;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 13px !important; /* Ajustamos el tamaño para los avatares */
+  transition: background-color 0.2s;
+}
+
+.hacker-avatar {
+  font-size: 13px !important; /* Avatares más pequeños a juego con el mapa */
+  width: 18px !important;
+  height: 18px !important;
+}
+
+
+.celda:hover {
+  background-color: rgba(0, 240, 255, 0.1);
+}
+
+/* PAREDES (FIREWALLS) */
+.pared {
+  background-color: #0b112c !important;
+  border: 1px solid #0055ff !important;
+  box-shadow: inset 0 0 8px rgba(0, 85, 255, 0.5);
+  cursor: not-allowed;
+}
+
+/* OBJETIVO CENTRAL (NÚCLEO) */
+.nucleo-central {
+  background-color: rgba(255, 0, 127, 0.2) !important;
+  border: 1px solid #ff007f !important;
+  box-shadow: 0 0 10px #ff007f !important;
+  animation: pulsoNeon 1.5s infinite alternate;
+}
+
+/* COLUMNA LATERAL (CHAT Y CÓDIGO) */
+/* --- APILAMIENTO VERTICAL CORRECTO DE LA COLUMNA DERECHA --- */
+.columna-lateral-derecha {
+  display: flex !important;
+  flex-direction: column !important; /* Fuerza a que los elementos caigan uno DEBAJO del otro */
+  align-items: center !important;
+  width: 240px !important;
+  gap: 15px !important; /* Separación vertical idéntica entre bloques */
+}
+
+/* Forzar que las tarjetas midan exactamente el mismo ancho */
+#modulo-dado-lateral {
+  width: 100% !important; /* Ocupan todo el ancho de la columna (240px) */
+  box-sizing: border-box !important;
+}
+
+
+/* Columna del chat a la izquierda */
+.columna-lateral-izquierda {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 240px !important;
+}
+
+/* Forzar que el chat ocupe una altura fija estética */
+#contenedor-chat {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid #0055ff !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 0 15px rgba(0, 85, 255, 0.1) !important;
+  height: 380px !important; /* Un poco más alto para que sea cómodo de leer */
+}
+
+#titulo-chat, #titulo-codigo-lateral {
+  background-color: #0055ff; color: #fff; text-shadow: 0 0 5px #fff;
+  text-align: center; padding: 6px; font-weight: bold; font-size: 11px; letter-spacing: 1px;
+}
+
+
+#mensajes-chat {
+  flex: 1 !important; /* Empuja el formulario al fondo */
+  overflow-y: auto !important;
+  padding: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  font-size: 12px !important;
+}
+
+
+#formulario-chat { display: flex; padding: 8px; border-top: 1px solid rgba(0, 85, 255, 0.3); }
+#entrada-mensaje { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-family: monospace; }
+#btn-enviar-chat { background: transparent; border: none; color: #00f0ff; cursor: pointer; font-weight: bold; }
+
+#caja-codigo-texto { padding: 12px; text-align: center; background-color: #020206; }
+#txt-sala-actual { color: #ff007f; text-shadow: 0 0 8px #ff007f; font-weight: bold; font-family: monospace; font-size: 15px; letter-spacing: 2px; }
+
+.oculto { display: none !important; }
+
+@keyframes pulsoNeon {
+  from { box-shadow: 0 0 5px #ff007f; }
+  to { box-shadow: 0 0 15px #ff007f; }
+}
+
+/* --- ESTILOS DE NEÓN PARA LAS FICHAS DE LOS HACKERS --- */
+.hacker-avatar {
+  font-size: 16px !important;
+  font-weight: bold !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease-in-out !important;
+  z-index: 10 !important;
+}
+
+/* Equipo Cian (Inician arriba a la izquierda) */
+.avatar-h1 {
+  background-color: rgba(0, 240, 255, 0.2) !important;
+  border: 2px solid #00f0ff !important;
+  box-shadow: 0 0 8px #00f0ff !important;
+}
+.avatar-h3 {
+  background-color: rgba(57, 255, 20, 0.2) !important;
+  border: 2px solid #39ff14 !important; /* Verde Neón para diferenciar al compañero */
+  box-shadow: 0 0 8px #39ff14 !important;
+}
+
+/* Equipo Azul (Inician abajo a la derecha) */
+.avatar-h2 {
+  background-color: rgba(0, 122, 255, 0.2) !important;
+  border: 2px solid #007aff !important;
+  box-shadow: 0 0 8px #007aff !important;
+}
+.avatar-h4 {
+  background-color: rgba(204, 0, 255, 0.2) !important;
+  border: 2px solid #cc00ff !important; /* Morado Neón para diferenciar al compañero */
+  box-shadow: 0 0 8px #cc00ff !important;
+}
+
+/* --- 1. DEVOLVER EL BORDE FUCSIA DE ALTA INTENSIDAD AL CÓDIGO --- */
+#contenedor-codigo-lateral {
+  border: 2px solid #ff007f !important; /* Fuerza el neón fucsia original */
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.3) !important;
+}
+#titulo-codigo-lateral {
+  background-color: #ff007f !important; /* Cabezal fucsia a juego */
+  color: #fff !important;
+}
+
+/* --- 3. CORRECCIÓN DE CONTRASTE CYBERPUNK PARA OPCIONES OCUPADAS --- */
+#selector-bando option:disabled {
+  color: rgba(255, 255, 255, 0.35) !important; /* Texto gris claro con transparencia perfectamente legible */
+  background-color: #1a0b1e !important; /* Fondo morado oscuro de alta visibilidad */
+  text-shadow: none !important;
+}
+#selector-bando option {
+  background-color: #0d0c1d !important; /* Fondo ultra oscuro para las opciones activas */
+  color: #fff !important;
+}
+
+/* --- ESTILOS DEL MÓDULO DEL DADO LATERAL --- */
+#modulo-dado-lateral {
+  width: 100% !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid #0055ff !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 10px !important;
+  box-shadow: 0 0 15px rgba(0, 85, 255, 0.1) !important;
+  box-sizing: border-box !important;
+}
+
+#btn-tirar-dado {
+  background-color: #00f0ff !important;
+  color: #000 !important;
+  font-weight: bold !important;
+  border: none !important;
+  border-radius: 4px !important;
+  height: 36px !important;
+  cursor: pointer !important;
+  font-family: monospace !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
+}
+
+#btn-tirar-dado:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.6) !important;
+}
+
+#zona-dado-visual {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 15px 0 !important;
+}
+
+/* El cubo de neón digitalizado */
+#cubo-neon-dado {
+  width: 60px !important;
+  height: 60px !important;
+  border: 3px solid #00f0ff !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 28px !important;
+  font-weight: bold !important;
+  color: #00f0ff !important;
+  text-shadow: 0 0 8px #00f0ff !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important;
+  background-color: #020206 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Clases dinámicas para los efectos de los modificadores */
+#cubo-neon-dado.congelado {
+  border-color: #fff !important;
+  color: #fff !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
+  text-shadow: 0 0 8px #fff !important;
+}
+
+#cubo-neon-dado.firewall {
+  border-color: #ff007f !important;
+  color: #ff007f !important;
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.4) !important;
+  text-shadow: 0 0 8px #ff007f !important;
+}
+
+/* Visor inferior de la acción de texto descriptiva */
+#visor-accion-sistema {
+  text-align: center !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  color: #39ff14 !important; /* Verde Neón para las órdenes */
+  text-shadow: 0 0 5px #39ff14 !important;
+  background-color: #020206 !important;
+  border: 1px solid rgba(57, 255, 32, 0.2) !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+/* --- NUEVOS PANELES DE EQUIPOS MULTIJUGADOR --- */
+.panel-equipo {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid rgba(0, 85, 255, 0.3) !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin-top: 15px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.titulo-equipo {
+  text-align: center !important; padding: 6px !important;
+  font-weight: bold !important; font-size: 11px !important; letter-spacing: 1px !important;
+}
+.titulo-equipo.cian { background-color: rgba(0, 240, 255, 0.15) !important; color: #00f0ff !important; border-bottom: 1px solid #00f0ff; }
+.titulo-equipo.azul { background-color: rgba(0, 122, 255, 0.15) !important; color: #007aff !important; border-bottom: 1px solid #007aff; }
+
+.lista-miembros { padding: 10px !important; display: flex !important; flex-direction: column !important; gap: 6px !important; font-size: 11px !important; }
+.miembro-linea { padding: 4px !important; border-radius: 2px !important; color: #aaa !important; transition: all 0.3s ease !important; }
+
+/* EFECTO NEÓN: Resalta con luz el jugador que tiene el turno actual */
+.miembro-linea.turno-activo {
+  color: #fff !important;
+  font-weight: bold !important;
+  background-color: rgba(57, 255, 20, 0.08) !important;
+  border: 1px solid #39ff14 !important;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.3) !important;
+}
+
+/* --- EFECTO NIEBLA DE GUERRA CYBERPUNK (EXPLORACIÓN A OSCURAS) --- */
+.celda.oscura {
+  background-color: #010103 !important; /* Oscuridad absoluta */
+  border-color: rgba(255, 255, 255, 0.01) !important;
+}
+.celda.oscura .pared {
+  background-color: #010103 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.celda.oscura.nucleo-central {
+  background-color: #010103 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Las celdas iluminadas por el radar del Hacker muestran su color original */
+.celda.iluminada {
+  transition: background-color 0.4s ease !important;
+}
