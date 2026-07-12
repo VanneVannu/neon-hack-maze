@@ -9,25 +9,32 @@
 <body>
   
   <!-- FASE 1: LOBBY DE ENTRADA GLOBAL -->
+    <!-- FASE 1: LOBBY DE ENTRADA GLOBAL INDEPENDIENTE -->
   <div id="pantalla-lobby">
     <div class="caja-lobby">
       <h1>NEON HACK MAZE</h1>
       <p>INFILTRACIÓN TÁCTICA EN TIEMPO REAL</p>
       
-      <div class="control-grupo-lobby" style="margin-bottom: 15px;">
-        <label for="entrada-apodo">TU ALIAS (HACKER TAG):</label>
-        <input type="text" id="entrada-apodo" placeholder="Escribe tu alias..." value="Anon" maxlength="15" autocomplete="off">
+      <!-- NUEVO: TARJETA DE IDENTIFICACIÓN INDEPENDIENTE -->
+      <div class="tarjeta-identificacion-global">
+        <label for="entrada-apodo">⚙️ CONFIGURACIÓN DE TU HACKER TAG:</label>
+        <input type="text" id="entrada-apodo" placeholder="Escribe tu alias aquí..." value="Anon" maxlength="15" autocomplete="off">
       </div>
 
-      <button id="btn-crear-codigo-sala">CREAR RED PRIVADA 🎲</button>
-      <div class="divisor-lobby"><span>Ó CONÉCTATE A UN NODO</span></div>
+      <!-- BLOQUE DE ACCIONES DE RED -->
+      <div class="bloque-acciones-red">
+        <button id="btn-crear-codigo-sala">CREAR RED PRIVADA 🎲</button>
+        
+        <div class="divisor-lobby"><span>Ó CONÉCTATE A UN NODO</span></div>
 
-      <div class="control-grupo-lobby">
-        <label for="entrada-sala">CÓDIGO DE RED:</label>
-        <input type="text" id="entrada-sala" placeholder="Introduce las 5 letras..." autocomplete="off">
+        <div class="control-grupo-lobby">
+          <label for="entrada-sala">CÓDIGO DE RED DEL ANFITRIÓN:</label>
+          <input type="text" id="entrada-sala" placeholder="Introduce las 5 letras..." autocomplete="off">
+        </div>
+        
+        <button id="btn-entrar-sala">ACCEDER AL SISTEMA ➤</button>
       </div>
-      
-      <button id="btn-entrar-sala">ACCEDER AL SISTEMA ➤</button>
+
     </div>
   </div>
 
