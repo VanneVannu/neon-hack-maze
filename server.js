@@ -88,12 +88,24 @@ io.on('connection', (socket) => {
     socket.miNumeroColor = red.contadorColor % 7;
     red.contadorColor++;
 
-    socket.emit('recibir-mapa-sincronizado', { mapa: red.mapaUnicoServidor });
+    //socket.emit('recibir-mapa-sincronizado', { mapa: red.mapaUnicoServidor });
 
     io.to(codigoSala).emit('actualizar-lista-integrantes', {
       n1: red.nombreH1, n2: red.nombreH2, n3: red.nombreH3, n4: red.nombreH4,
       tuSlot: socket.miSlotAsignado
     });
+
+       console.log(`[NODO]: ${apodoReal} asignado al slot ${socket.miSlotAsignado} en la sala ${codigoSala}`);
+    }); // <-- AQUÍ SE CIERRA EL EVENTO DE UNIRSE A SALA
+
+    // --- NUEVA ANTENA CONTROLADORA: PIDE EL MAPA CUANDO LA PÁGINA YA CARGÓ ---
+    socket.on('solicitar-mapa-inicial', () => {
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      // Enviamos el mapa oficial directo al terminal que lo solicitó
+      socket.emit('recibir-mapa-sincronizado', { mapa: redesOcupadas[redNombre].mapaUnicoServidor });
+    }
+
   });
 
   socket.on('enviar-mensaje', (datosMensaje) => {
