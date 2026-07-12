@@ -447,3 +447,22 @@ function agregarMensajeAlCuadro(datos, claseOrigen) {
   mensajesChat.appendChild(div);
   mensajesChat.scrollTop = mensajesChat.scrollHeight; // Auto-scroll al fondo
 }
+
+// =======================================================
+// --- RECEPTORES INALÁMBRICOS DE SOCKETS PARA EL CHAT ---
+// =======================================================
+
+// 1. ANTENA RECEPTORA: Escucha cuando el servidor devuelve un mensaje
+socket.on('recibir-mensaje', (datosRecibidos) => {
+  const aliasActual = entradaApodo.value.trim() || "Anon";
+  const prefijoBando = bandoAsignado === "equipo-cian" ? "💎" : (bandoAsignado === "equipo-azul" ? "🔵" : "👁️");
+  const miFirmaCompleta = `${prefijoBando} ${aliasActual}`;
+
+  // Si el mensaje es mío, se pinta a la derecha; si es del rival, a la izquierda
+  if (datosRecibidos.remitente === miFirmaCompleta) {
+    agregarMensajeAlCuadro(datosRecibidos, "yo");
+  } else {
+    agregarMensajeAlCuadro(datosRecibidos, "oponente");
+  }
+});
+
