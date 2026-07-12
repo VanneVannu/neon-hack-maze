@@ -26,7 +26,6 @@ const btnIniciarPartidaLobby = document.getElementById('btn-iniciar-partida-lobb
 
 // Capturas del DOM - Juego Limpio Fase 3
 const contenedorPrincipal = document.getElementById('contenedor-principal');
-const txtSalaActual = document.getElementById('txt-sala-actual');
 const tableroLaberinto = document.getElementById('tablero-laberinto');
 const btnReiniciar = document.getElementById('btn-reiniciar');
 const bandoActualTxt = document.getElementById('bando-actual');
@@ -59,6 +58,25 @@ function generarCodigoSala() {
   let resultado = '';
   for (let i = 0; i < 5; i++) { resultado += caracteres.charAt(Math.floor(Math.random() * caracteres.length)); }
   return resultado;
+}
+// -- Metodo de ingreso al juego --
+function entrarAlJuego(codigoSala) {
+  pantallaLobby.classList.add('oculto');
+  pantallaEsperaSlots.classList.remove('oculto');
+  
+  const miAliasEscrito = entradaApodo.value.trim() || "Anon";
+  const codigoMayusculas = codigoSala.toUpperCase();
+
+  // --- NUEVO: INYECTAR EL CÓDIGO EN LAS DOS PANTALLAS SIMULTÁNEAMENTE ---
+  // Buscamos el ID del tablero y la clase del lobby de espera
+  const letreroTablero = document.getElementById('txt-sala-actual');
+  const letreroLobbyEspera = document.querySelector('.txt-sala-compartida-lobby');
+  
+  if (letreroTablero) letreroTablero.textContent = codigoMayusculas;
+  if (letreroLobbyEspera) letreroLobbyEspera.textContent = `RED: ${codigoMayusculas}`;
+  // ---------------------------------------------------------------------
+
+  socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 }
 
 btnCrearCodigoSala.addEventListener('click', () => avanzarALobbyEspera(generarCodigoSala().toLowerCase()));
