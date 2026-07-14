@@ -67,10 +67,9 @@ function entrarAlJuego(codigoSala) {
   const miAliasEscrito = entradaApodo.value.trim() || "Anon";
   const codigoMayusculas = codigoSala.toUpperCase();
 
-  // --- NUEVO: INYECTAR EL CÓDIGO EN LAS DOS PANTALLAS SIMULTÁNEAMENTE ---
-  // Buscamos el ID del tablero y la clase del lobby de espera
+  // --- INYECCIÓN DIRECTA POR ID SIN ERRORES ---
   const letreroTablero = document.getElementById('txt-sala-actual');
-  const letreroLobbyEspera = document.querySelector('.txt-sala-compartida-lobby');
+  const letreroLobbyEspera = document.getElementById('txt-sala-espera');
   
   if (letreroTablero) letreroTablero.textContent = codigoMayusculas;
   if (letreroLobbyEspera) letreroLobbyEspera.textContent = `RED: ${codigoMayusculas}`;
@@ -78,6 +77,7 @@ function entrarAlJuego(codigoSala) {
 
   socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 }
+
 
 btnCrearCodigoSala.addEventListener('click', () => avanzarALobbyEspera(generarCodigoSala().toLowerCase()));
 btnEntrarSala.addEventListener('click', () => {
