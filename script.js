@@ -412,3 +412,28 @@ socket.on('servidor-confirmar-reinicios', (datos) => {
   matrizLaberinto = datos.nuevoMapa;
   alert("La red se ha reiniciado por completo.");
 });
+
+// --- SINCRONIZAR LOS APODOS EN LAS RANURAS LATERALES DEL LABERINTO ---
+socket.on('actualizar-lista-integrantes', (datosSala) => {
+  console.log("Sincronizando apodos en la zona de juego:", datosSala);
+  
+  // 1. Buscamos las ranuras de texto del panel izquierdo (Cian) y derecho (Azul)
+  const slot1 = document.querySelector('#slot-cian-1 .nombre-slot');
+  const slot2 = document.querySelector('#slot-azul-1 .nombre-slot');
+  const slot3 = document.querySelector('#slot-cian-2 .nombre-slot');
+  const slot4 = document.querySelector('#slot-azul-2 .nombre-slot');
+
+  // 2. Inyectamos los nombres reales que nos manda el servidor de Render
+  if (slot1) slot1.textContent = datosSala.n1 || "Esperando...";
+  if (slot2) slot2.textContent = datosSala.n2 || "Esperando...";
+  if (slot3) slot3.textContent = datosSala.n3 || "Esperando...";
+  if (slot4) slot4.textContent = datosSala.n4 || "Esperando...";
+
+  // 3. Te asigna equipo estático la primera vez que entras de lobby
+  if (datosSala.tuSlot && datosSala.tuSlot !== "espectador" && bandoAsignado === "espectador") {
+    const miClanAsignado = (datosSala.tuSlot === "hacker1" || datosSala.tuSlot === "hacker3") ? "equipo-cian" : "equipo-azul";
+    bandoAsignado = miClanAsignado;
+    if (selectorBando) selectorBando.value = miClanAsignado;
+    dibujarLaberintoEnPantalla();
+  }
+});
