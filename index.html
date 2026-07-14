@@ -8,14 +8,15 @@
 </head>
 <body>
   
-  <!-- FASE 1: LOBBY DE ENTRADA GLOBAL -->
-    <!-- FASE 1: LOBBY DE ENTRADA GLOBAL INDEPENDIENTE -->
+  <!-- ======================================================= -->
+  <!-- FASE 1: LOBBY DE ENTRADA GLOBAL INDEPENDIENTE -->
+  <!-- ======================================================= -->
   <div id="pantalla-lobby">
     <div class="caja-lobby">
       <h1>NEON HACK MAZE</h1>
       <p>INFILTRACIÓN TÁCTICA EN TIEMPO REAL</p>
       
-      <!-- NUEVO: TARJETA DE IDENTIFICACIÓN INDEPENDIENTE -->
+      <!-- TARJETA DE IDENTIFICACIÓN INDEPENDIENTE -->
       <div class="tarjeta-identificacion-global">
         <label for="entrada-apodo">⚙️ CONFIGURACIÓN DE TU HACKER TAG:</label>
         <input type="text" id="entrada-apodo" placeholder="Escribe tu alias aquí..." value="Anon" maxlength="15" autocomplete="off">
@@ -34,33 +35,30 @@
         
         <button id="btn-entrar-sala">ACCEDER AL SISTEMA ➤</button>
       </div>
-
     </div>
   </div>
 
-  <!-- FASE 2: LOBBY DE ESPERA Y PREPARACIÓN DE EQUIPOS (NUEVO) -->
-  <!-- FASE 2: LOBBY DE ESPERA CON CHAT INTEGRADO Y DISEÑO SIMÉTRICO -->
-  <!-- FASE 2: LOBBY DE ESPERA CON CHAT INTEGRADO Y DISEÑO SIMÉTRICO -->
-  <!-- FASE 2: LOBBY DE ESPERA TOTALMENTE EQUIPADO -->
+  <!-- ======================================================= -->
+  <!-- FASE 2: LOBBY DE ESPERA Y PREPARACIÓN DE EQUIPOS -->
+  <!-- ======================================================= -->
   <div id="pantalla-espera-slots" class="oculto">
     <div id="caja-espera-slots" style="position: relative;">
       
-      <!-- NUEVO: BOTÓN CYBERPUNK PARA REGRESAR A LA FASE 1 -->
+      <!-- BOTÓN CYBERPUNK PARA REGRESAR A LA FASE 1 -->
       <button id="btn-regresar-lobby" style="position: absolute; top: 15px; left: 15px; background: transparent; border: 1px solid #ff007f; color: #ff007f; text-shadow: 0 0 5px #ff007f; font-family: monospace; font-size: 11px; padding: 5px 10px; cursor: pointer; border-radius: 4px;">🗙 DESCONECTAR</button>
 
       <h2 style="margin-top: 20px;">SALA DE PREPARACIÓN DE RED</h2>
       <p style="color: #007aff; font-size: 11px; letter-spacing: 1px; margin-bottom: 5px;">ELIJE TU SLOT DE INFILTRACIÓN TÁCTICA</p>
       
-      <!-- VISOR DE CÓDIGO INTERMEDIO COMPACTO CORREGIDO -->
+      <!-- VISOR DE CÓDIGO INTERMEDIO COMPACTO -->
       <div style="margin: 10px 0 20px 0;">
         <span id="txt-sala-espera" style="color: #ff007f; text-shadow: 0 0 8px #ff007f; font-weight: bold; font-family: monospace; font-size: 16px; letter-spacing: 2px;">RED: ESPERANDO...</span>
       </div>
       
-      <!-- CUERPO DISTRIBUIDO -->
+      <!-- CUERPO DISTRIBUIDO DEL LOBBY DE ESPERA -->
       <div style="display: flex !important; flex-direction: row !important; gap: 30px !important; justify-content: center !important; align-items: flex-start !important; width: 100% !important;">
         
-        
-        <!-- SUB-COLUMNA IZQUIERDA: CLANES COMPACTOS SIN DUPLICADOS -->
+        <!-- SUB-COLUMNA IZQUIERDA: LOS DOS CLANES DE SELECCIÓN DE SLOTS -->
         <div id="grid-slots-preparacion" style="display: flex !important; flex-direction: row !important; gap: 20px !important; margin: 0 !important;">
           <!-- Lado Cian -->
           <div class="bloque-preparacion-equipo cian" style="border: 2px solid #00f0ff; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 4px; width: 160px;">
@@ -77,26 +75,23 @@
           </div>
         </div>
 
-
-        <!-- SUB-COLUMNA DERECHA -->
+        <!-- SUB-COLUMNA DERECHA: EL BOTÓN DE INICIO -->
         <div style="display: flex !important; flex-direction: column !important; gap: 20px !important; flex: 1 !important;">
           <button id="btn-iniciar-partida-lobby">ARRANCAR HACKEO 🚀</button>
           <p style="color: rgba(255,255,255,0.3); font-size: 10px; line-height: 1.5; margin: 0; text-align: left; font-family: monospace;">
             [INFO]: EL SISTEMA SORTEARÁ LA INICIATIVA DE RED AUTOMÁTICAMENTE ENTRE LOS HACKERS LISTADOS.
           </p>
         </div>
-
       </div> 
-
     </div>
   </div>
 
-
-    
-    <!-- FASE 3: CONTENEDOR PRINCIPAL DEL JUEGO -->
+  <!-- ======================================================= -->
+  <!-- FASE 3: CONTENEDOR PRINCIPAL DEL TABLERO DE JUEGO -->
+  <!-- ======================================================= -->
   <div id="contenedor-principal" class="oculto">
     
-    <!-- Barra superior -->
+    <!-- BARRA SUPERIOR DE HERRAMIENTAS UNIFICADA -->
     <div id="interfaz">
       <div id="marcador-turno">Turno: <span id="bando-actual">HACKER 1</span></div>
       <div id="contenedor-controles">
@@ -105,13 +100,10 @@
       </div>
     </div>
 
-    <!-- La zona central del juego con el laberinto y las columnas continúa igual abajo... -->
-
-
-    <!-- ZONA CENTRAL DE JUEGO CON PANELES DE TURNOS INTEGRADOS -->
+    <!-- ZONA CENTRAL DE JUEGO ASIMÉTRICA EN 3 COLUMNAS -->
     <div id="zona-juego">
       
-      <!-- COLUMNA LATERAL IZQUIERDA (CHAT + TURNO CIAN) -->
+      <!-- COLUMNA LATERAL IZQUIERDA (CHAT + CUADRO CIAN INTERACTIVO) -->
       <div class="columna-lateral-izquierda">
         <div id="contenedor-chat">
           <div id="titulo-chat">CANAL DE COMUNICACIÓN</div>
@@ -122,8 +114,7 @@
           </div>
         </div>
 
-       <!-- RE-INJECTADO: Cuadro de turnos del equipo Azul abajo del dado -->
-       <!-- REVISE EL PANEL CIAN ABAJO DEL CHAT -->
+        <!-- PANEL DE INTEGRANTES EN PARTIDA: EQUIPO CIAN -->
         <div class="panel-equipo" id="panel-equipo-cian" style="margin-top: 15px; border: 1px solid #00f0ff; background: rgba(0,0,0,0.4); border-radius: 4px;">
           <div class="titulo-equipo cian" style="background: rgba(0,240,255,0.1); color: #00f0ff; padding: 6px; text-align: center; font-size: 11px; font-weight: bold;">EQUIPO CIAN 💎</div>
           <div style="padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
@@ -131,26 +122,33 @@
             <div class="miembro-linea" id="slot-cian-2">HACKER 3: <span class="nombre-slot">Esperando...</span></div>
           </div>
         </div>
-
-      <!-- CONTENEDOR CENTRAL DEL LABERINTO -->
-      <div id="contenedor-laberinto">
-        <div id="tablero-laberinto"></div>
       </div>
 
-      <!-- COLUMNA LATERAL DERECHA (DADO, ACCESO + TURNO AZUL) -->
+      <!-- CONTENEDOR CENTRAL EXCLUSIVO PARA EL LABERINTO -->
+      <div id="contenedor-laberinto">
+        <div id="tablero-laberinto">
+          <!-- Las casillas se generan dinámicamente con JavaScript -->
+        </div>
+      </div>
+
+      <!-- COLUMNA LATERAL DERECHA (DADO, NODO + CUADRO AZUL INTERACTIVO) -->
       <div class="columna-lateral-derecha">
         <div id="contenedor-codigo-lateral">
           <div id="titulo-codigo-lateral">NODO DE ACCESO</div>
-          <div id="caja-codigo-texto"><span id="txt-sala-actual">ESPERANDO RED...</span></div>
+          <div id="caja-codigo-texto">
+            <span id="txt-sala-actual">ESPERANDO RED...</span>
+          </div>
         </div> 
 
         <div id="modulo-dado-lateral">
           <button id="btn-tirar-dado">EJECUTAR DADO 🎲</button>
-          <div id="zona-dado-visual"><div id="cubo-neon-dado">--</div></div>
+          <div id="zona-dado-visual">
+            <div id="cubo-neon-dado">--</div>
+          </div>
           <div id="visor-accion-sistema">ESPERANDO INICIO...</div>
         </div>
 
-        <!-- REVISE EL PANEL AZUL ABAJO DEL DADO Y DÉJELO ASÍ: -->
+        <!-- PANEL DE INTEGRANTES EN PARTIDA: EQUIPO AZUL -->
         <div class="panel-equipo" id="panel-equipo-azul" style="margin-top: 15px; border: 1px solid #007aff; background: rgba(0,0,0,0.4); border-radius: 4px;">
           <div class="titulo-equipo azul" style="background: rgba(0,122,255,0.1); color: #007aff; padding: 6px; text-align: center; font-size: 11px; font-weight: bold;">EQUIPO AZUL 🔵</div>
           <div style="padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
@@ -159,15 +157,16 @@
           </div>
         </div>
         
+        <!-- Visor auxiliar oculto de pasos -->
         <div id="visor-dado" class="oculto">PASOS: --</div>
       </div> 
-    </div><!-- FIN ZONA DE JUEGO -->
 
-
+    </div> <!-- FIN ZONA JUEGO -->
   </div> <!-- FIN CONTENEDOR PRINCIPAL -->
 
+  <!-- LETRERO FLOTANTE DE VICTORIA FIN DE PARTIDA -->
   <div id="pantalla-victoria" class="oculto">
-    <h2>¡SISTEMA COMPROMETIDO!</h2>
+    <h2>¡SISTEMA COMPROMIDITO!</h2>
     <p id="mensaje-ganador">Infiltración exitosa</p>
   </div>
 
@@ -175,4 +174,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
