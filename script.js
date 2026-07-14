@@ -190,6 +190,17 @@ function dibujarLaberintoEnPantalla() {
 //PARTE 3 DE 3: Movimientos, Dados e Inalámbricos Sockets
 //Clics de Casillas, Botones y Nuevas Antenas del Servidor
 
+const btnRegresarLobby = document.getElementById('btn-regresar-lobby');
+
+// Evento para desconectarse y volver a la Fase 1
+if (btnRegresarLobby) {
+  btnRegresarLobby.addEventListener('click', () => {
+    // Forzamos el recargue de la página para romper sockets limpiamente y volver a fase 1
+    window.location.reload(); 
+  });
+}
+
+
 // --- MOVIMIENTOS POR INTERNET ---
 function handleCasillaClick(fila, columna) {
   if (!partidaIniciada || juegoTerminado || bandoAsignado === "espectador") return;
@@ -272,10 +283,18 @@ if (btnTirarDado) {
     const clanActivo = (hackerIdActivo === "hacker1" || hackerIdActivo === "hacker3") ? "equipo-cian" : "equipo-azul";
     if (bandoAsignado !== clanActivo || dadoLanzadoEsteTurno) return;
 
-    const resultadoDado = Math.floor(Math.random() * 6) + 1;
+    // Busca esta sección exacta dentro del clic del dado y déjala así:
+    if (dadoLanzadoEsteTurno) {
+       alert("Acceso denegado: Ya has ejecutado el dado en este ciclo. Realiza tus pasos en el laberinto o espera tu próximo turno.");
+      return; // Evita el doble tiro
+    }
+
+     const resultadoDado = Math.floor(Math.random() * 6) + 1;
     socket.emit('solicitar-lanzamiento-dado', { numero: resultadoDado, clan: clanActivo });
   });
 }
+
+
 
 // ==========================================
 // --- RECEPTORES SINTONIZADOS MULTIJUGADOR ---
@@ -352,14 +371,22 @@ socket.on('servidor-confirmar-inicio', (datos) => {
   if (contenedorPrincipal) contenedorPrincipal.classList.remove('oculto'); 
   
   if (visorAccionSistema) visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
-  if (datos.sorteoCian) ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
-  else ordenTurnos = ["hacker2", "hacker1", "hacker4", "hacker3"];
-  indiceTurnoActual = 0;
   
+  // --- PUNTO 3: DEVOLVER LAS ALERTAS MULTIJUGADOR DE SORTEO ---
+  if (datos.sorteoCian) {
+    ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
+    alert("🎲 [SISTEMA DE SORTEO]: Moneda digital lanzada. ¡El EQUIPO CIAN toma la delantera! Turno de HACKER 1.");
+  } else {
+    ordenTurnos = ["hacker2", "hacker1", "hacker4", "hacker3"];
+    alert("🎲 [SISTEMA DE SORTEO]: Moneda digital lanzada. ¡El EQUIPO AZUL toma la delantera! Turno de HACKER 2.");
+  }
+  
+  indiceTurnoActual = 0;
   calcularRangoRadarVision();
   dibujarLaberintoEnPantalla(); 
   actualizarBrilloPanelesTurnos();
 });
+
 
 socket.on('servidor-confirmar-reinicios', (datos) => {
   partidaIniciada = false; juegoTerminado = false; bandoAsignado = "espectador";
@@ -377,4 +404,3 @@ socket.on('servidor-confirmar-reinicios', (datos) => {
   matrizLaberinto = datos.nuevoMapa;
   alert("La red se ha reiniciado por completo.");
 });
-
