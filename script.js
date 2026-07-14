@@ -4,7 +4,10 @@
 // =======================================================
 // --- NEONHACKMAZE: MOTOR CLIENTE GLOBAL SINCRONIZADO ---
 // =======================================================
-const socket = io(); // Enlace inalámbrico activo
+// ==========================================
+// --- PARTE 1: VARIABLES GLOBAL MULTIJUGADOR ---
+// ==========================================
+const socket = io(); // Enlazado inalámbrico oficial de Render
 
 const TAMANO = 21; 
 let bandoAsignado = "espectador";
@@ -13,19 +16,20 @@ let juegoTerminado = false;
 let pasosDisponibles = 0; 
 let dadoLanzadoEsteTurno = false; 
 
-// Capturas del DOM - Lobby Fase 1
+// Elementos del DOM - Fase 1 (Lobby Entrada)
 const pantallaLobby = document.getElementById('pantalla-lobby');
 const entradaSala = document.getElementById('entrada-sala');
 const btnCrearCodigoSala = document.getElementById('btn-crear-codigo-sala');
 const btnEntrarSala = document.getElementById('btn-entrar-sala');
 const entradaApodo = document.getElementById('entrada-apodo');
 
-// Capturas del DOM - Lobby Fase 2 (PREPARACIÓN DE SLOTS)
+// Elementos del DOM - Fase 2 (Lobby Espera / Slots)
 const pantallaEsperaSlots = document.getElementById('pantalla-espera-slots');
 const btnIniciarPartidaLobby = document.getElementById('btn-iniciar-partida-lobby');
 
-// Capturas del DOM - Juego Limpio Fase 3
+// Elementos del DOM - Fase 3 (Tablero de Juego)
 const contenedorPrincipal = document.getElementById('contenedor-principal');
+const txtSalaActual = document.getElementById('txt-sala-actual');
 const tableroLaberinto = document.getElementById('tablero-laberinto');
 const btnReiniciar = document.getElementById('btn-reiniciar');
 const bandoActualTxt = document.getElementById('bando-actual');
@@ -33,7 +37,7 @@ const btnTirarDado = document.getElementById('btn-tirar-dado');
 const cuboNeonDado = document.getElementById('cubo-neon-dado');
 const visorAccionSistema = document.getElementById('visor-accion-sistema');
 
-// Capturas del DOM - Canal de Comunicación
+// Elementos del DOM - Canal de Mensajes (Chat)
 const mensajesChat = document.getElementById('mensajes-chat');
 const entradaMensaje = document.getElementById('entrada-mensaje');
 const btnEnviarChat = document.getElementById('btn-enviar-chat');
@@ -43,7 +47,6 @@ let ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
 let indiceTurnoActual = 0; 
 let historialPosiciones = {}; 
 
-// Avatares síncronos compartidos por clan
 let posicionesHackers = {
   "equipo-cian": { f: 0, c: 0, avatar: "💎", clase: "avatar-h1" },
   "equipo-azul": { f: 20, c: 20, avatar: "🔵", clase: "avatar-h2" }
@@ -59,7 +62,13 @@ function generarCodigoSala() {
   for (let i = 0; i < 5; i++) { resultado += caracteres.charAt(Math.floor(Math.random() * caracteres.length)); }
   return resultado;
 }
-// -- Metodo de ingreso al juego --
+
+btnCrearCodigoSala.addEventListener('click', () => entrarAlJuego(generarCodigoSala().toLowerCase()));
+btnEntrarSala.addEventListener('click', () => {
+  const codigo = entradaSala.value.trim().toLowerCase();
+  if (codigo !== "") entrarAlJuego(codigo);
+});
+
 function entrarAlJuego(codigoSala) {
   pantallaLobby.classList.add('oculto');
   pantallaEsperaSlots.classList.remove('oculto');
@@ -67,33 +76,14 @@ function entrarAlJuego(codigoSala) {
   const miAliasEscrito = entradaApodo.value.trim() || "Anon";
   const codigoMayusculas = codigoSala.toUpperCase();
 
-  // --- INYECCIÓN DIRECTA POR ID SIN ERRORES ---
+  // Inyección robusta en las dos etiquetas
   const letreroTablero = document.getElementById('txt-sala-actual');
   const letreroLobbyEspera = document.getElementById('txt-sala-espera');
   
   if (letreroTablero) letreroTablero.textContent = codigoMayusculas;
   if (letreroLobbyEspera) letreroLobbyEspera.textContent = `RED: ${codigoMayusculas}`;
-  // ---------------------------------------------------------------------
 
-  socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
-}
-
-
-btnCrearCodigoSala.addEventListener('click', () => avanzarALobbyEspera(generarCodigoSala().toLowerCase()));
-btnEntrarSala.addEventListener('click', () => {
-  const codigo = entradaSala.value.trim().toLowerCase();
-  if (codigo !== "") avanzarALobbyEspera(codigo);
-});
-
-function avanzarALobbyEspera(codigoSala) {
-  // Ocultamos la entrada y prendemos el Lobby de Espera intermedio
-  pantallaLobby.classList.add('oculto');
-  pantallaEsperaSlots.classList.remove('oculto');
-  txtSalaActual.textContent = codigoSala.toUpperCase();
-  
-  const miAliasEscrito = entradaApodo.value.trim() || "Anon";
-  
-  // Nos conectamos al servidor mandando alias y sala limpia
+  // Emitimos los datos al servidor en Node.js
   socket.emit('unirse-a-sala', { sala: codigoSala, apodo: miAliasEscrito });
 }
 
@@ -103,6 +93,7 @@ function avanzarALobbyEspera(codigoSala) {
 
 // --- CANAL DE COMUNICACIÓN (MESSAGING MOTOR) ---
 function enviarMensajeTexto() {
+  if (!entradaMensaje) return;
   const texto = entradaMensaje.value.trim();
   if (texto === "") return;
 
@@ -115,10 +106,11 @@ function enviarMensajeTexto() {
   entradaMensaje.value = "";
 }
 
-btnEnviarChat.addEventListener('click', enviarMensajeTexto);
-entradaMensaje.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensajeTexto(); });
+if (btnEnviarChat) btnEnviarChat.addEventListener('click', enviarMensajeTexto);
+if (entradaMensaje) entradaMensaje.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensajeTexto(); });
 
 function agregarMensajeAlCuadro(datos, claseOrigen) {
+  if (!mensajesChat) return;
   const div = document.createElement('div');
   div.classList.add('mensaje', claseOrigen);
   
@@ -152,8 +144,8 @@ function calcularRangoRadarVision() {
 }
 
 function dibujarLaberintoEnPantalla() {
+  if (!tableroLaberinto || matrizLaberinto.length === 0) return;
   tableroLaberinto.innerHTML = "";
-  if (matrizLaberinto.length === 0) return;
   const centro = Math.floor(TAMANO / 2);
 
   for (let f = 0; f < TAMANO; f++) {
@@ -220,7 +212,7 @@ function ejecutarMovimientoFisicoSincronizado(clan, fDes, cDes) {
   historialPosiciones[clan] = { f: datosAvatar.f, c: datosAvatar.c };
   datosAvatar.f = fDes; datosAvatar.c = cDes;
   pasosDisponibles--;
-  visorAccionSistema.textContent = `PASOS RESTANTES EN RED: ${pasosDisponibles}`;
+  if (visorAccionSistema) visorAccionSistema.textContent = `PASOS RESTANTES EN RED: ${pasosDisponibles}`;
   calcularRangoRadarVision(); 
   dibujarLaberintoEnPantalla();
 
@@ -234,55 +226,56 @@ function ejecutarMovimientoFisicoSincronizado(clan, fDes, cDes) {
 
 function rotarTurnoElectronico() {
   dadoLanzadoEsteTurno = false; pasosDisponibles = 0;
-  cuboNeonDado.textContent = "--"; cuboNeonDado.classList.remove('congelado', 'firewall');
-  visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
+  if (cuboNeonDado) { cuboNeonDado.textContent = "--"; cuboNeonDado.classList.remove('congelado', 'firewall'); }
+  if (visorAccionSistema) visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
   indiceTurnoActual = (indiceTurnoActual + 1) % ordenTurnos.length;
   actualizarBrilloPanelesTurnos();
 }
 
 function actualizarBrilloPanelesTurnos() {
   const hackerIdActivo = ordenTurnos[indiceTurnoActual];
-  bandoActualTxt.textContent = hackerIdActivo.toUpperCase().replace("HACKER", "HACKER ");
+  if (bandoActualTxt) bandoActualTxt.textContent = hackerIdActivo.toUpperCase().replace("HACKER", "HACKER ");
 }
 
 // --- CONECTAR LOS 4 BOTONES INTERACTIVOS DEL LOBBY DE ESPERA ---
 const botonesSlots = document.querySelectorAll('.btn-ocupar-slot');
 botonesSlots.forEach(btn => {
   btn.addEventListener('click', (e) => {
-    // Si ya elegimos bando, bloqueamos clics extras locales
     if (bandoAsignado !== "espectador") return;
-    
-    const idSlotPresionado = e.currentTarget.id.replace("action-", ""); // Extrae: hacker1, hacker2, etc.
+    const idSlotPresionado = e.currentTarget.id.replace("action-", "");
     const clanElegido = (idSlotPresionado === "hacker1" || idSlotPresionado === "hacker3") ? "equipo-cian" : "equipo-azul";
-    
-    // Le solicitamos formalmente al servidor apartar ese número de ranura
     socket.emit('solicitar-ocupar-slot-servidor', { slot: idSlotPresionado, clan: clanElegido });
   });
 });
 
-// Botón verde de arrancar la Secuencia de Hackeo
-btnIniciarPartidaLobby.addEventListener('click', () => {
-  if (bandoAsignado === "espectador") {
-    alert("Acceso denegado: Debes asegurar y ocupar una ranura de hacker antes de iniciar la secuencia.");
-    return;
-  }
-  socket.emit('solicitar-inicio-partida', { sorteoCian: Math.random() > 0.5 });
-});
+if (btnIniciarPartidaLobby) {
+  btnIniciarPartidaLobby.addEventListener('click', () => {
+    if (bandoAsignado === "espectador") {
+      alert("Acceso denegado: Debes asegurar y ocupar una ranura de hacker antes de iniciar la secuencia.");
+      return;
+    }
+    socket.emit('solicitar-inicio-partida', { sorteoCian: Math.random() > 0.5 });
+  });
+}
 
-btnReiniciar.addEventListener('click', () => {
-  if (bandoAsignado === "espectador") return;
-  socket.emit('solicitar-reiniciar-red');
-});
+if (btnReiniciar) {
+  btnReiniciar.addEventListener('click', () => {
+    if (bandoAsignado === "espectador") return;
+    socket.emit('solicitar-reiniciar-red');
+  });
+}
 
-btnTirarDado.addEventListener('click', () => {
-  if (!partidaIniciada || juegoTerminado || bandoAsignado === "espectador") return;
-  const hackerIdActivo = ordenTurnos[indiceTurnoActual];
-  const clanActivo = (hackerIdActivo === "hacker1" || hackerIdActivo === "hacker3") ? "equipo-cian" : "equipo-azul";
-  if (bandoAsignado !== clanActivo || dadoLanzadoEsteTurno) return;
+if (btnTirarDado) {
+  btnTirarDado.addEventListener('click', () => {
+    if (!partidaIniciada || juegoTerminado || bandoAsignado === "espectador") return;
+    const hackerIdActivo = ordenTurnos[indiceTurnoActual];
+    const clanActivo = (hackerIdActivo === "hacker1" || hackerIdActivo === "hacker3") ? "equipo-cian" : "equipo-azul";
+    if (bandoAsignado !== clanActivo || dadoLanzadoEsteTurno) return;
 
-  const resultadoDado = Math.floor(Math.random() * 6) + 1;
-  socket.emit('solicitar-lanzamiento-dado', { numero: resultadoDado, clan: clanActivo });
-});
+    const resultadoDado = Math.floor(Math.random() * 6) + 1;
+    socket.emit('solicitar-lanzamiento-dado', { numero: resultadoDado, clan: clanActivo });
+  });
+}
 
 // ==========================================
 // --- RECEPTORES SINTONIZADOS MULTIJUGADOR ---
@@ -292,17 +285,15 @@ socket.on('recibir-mapa-sincronizado', (datos) => {
   matrizLaberinto = datos.mapa;
 });
 
-// NUEVA ANTENA: Pinta de color verde neón el botón del slot que ocupó un amigo en internet
 socket.on('actualizar-slots-preparacion', (datosSlots) => {
-  console.log("Estado de slots de preparación:", datosSlots);
-  
+  console.log("Estado de slots recibido:", datosSlots);
   for (let idSlot in datosSlots) {
     const btnFisico = document.getElementById(`action-${idSlot}`);
     if (!btnFisico) continue;
 
     if (datosSlots[idSlot] !== null) {
       btnFisico.classList.add('ocupado');
-      btnFisico.textContent = datosSlots[idSlot].toUpperCase(); // Escribe el apodo del Hacker
+      btnFisico.textContent = datosSlots[idSlot].toUpperCase(); 
     } else {
       btnFisico.classList.remove('ocupado');
       btnFisico.textContent = `OCUPAR ${idSlot.toUpperCase().replace("HACKER", "HACKER ")}`;
@@ -310,10 +301,9 @@ socket.on('actualizar-slots-preparacion', (datosSlots) => {
   }
 });
 
-// NUEVA ANTENA: Escucha el bando exacto que te dio el servidor para tu consola
 socket.on('confirmar-tu-slot-asignado', (datos) => {
   bandoAsignado = datos.clan;
-  alert(`[CONEXIÓN SECURE]: Has tomado control de la ranura de infiltración: ${datos.slot.toUpperCase()}`);
+  alert(`[CONEXIÓN SECURE]: Has tomado control de la ranura: ${datos.slot.toUpperCase()}`);
 });
 
 socket.on('recibir-mensaje', (datos) => {
@@ -326,17 +316,16 @@ socket.on('recibir-mensaje', (datos) => {
 
 socket.on('servidor-retransmitir-dado', (datos) => {
   dadoLanzadoEsteTurno = true;
-  cuboNeonDado.classList.remove('congelado', 'firewall');
-  cuboNeonDado.textContent = datos.numero;
+  if (cuboNeonDado) { cuboNeonDado.classList.remove('congelado', 'firewall'); cuboNeonDado.textContent = datos.numero; }
 
   if (datos.numero === 1) {
-    cuboNeonDado.classList.add('congelado');
-    visorAccionSistema.textContent = "SISTEMA CONGELADO ❄️ (PIERDES TURNO)";
+    if (cuboNeonDado) cuboNeonDado.classList.add('congelado');
+    if (visorAccionSistema) visorAccionSistema.textContent = "SISTEMA CONGELADO ❄️ (PIERDES TURNO)";
     setTimeout(rotarTurnoElectronico, 1500); 
   } 
   else if (datos.numero === 6) {
-    cuboNeonDado.classList.add('firewall');
-    visorAccionSistema.textContent = "ALERTA FIREWALL 🛡️ (RETROCEDES 1 PASO)";
+    if (cuboNeonDado) cuboNeonDado.classList.add('firewall');
+    if (visorAccionSistema) visorAccionSistema.textContent = "ALERTA FIREWALL 🛡️ (RETROCEDES 1 PASO)";
     if (historialPosiciones[datos.clan]) {
       posicionesHackers[datos.clan].f = historialPosiciones[datos.clan].f;
       posicionesHackers[datos.clan].c = historialPosiciones[datos.clan].c;
@@ -347,23 +336,22 @@ socket.on('servidor-retransmitir-dado', (datos) => {
   } 
   else if (datos.numero === 2 || datos.numero === 3) {
     pasosDisponibles = 1;
-    visorAccionSistema.textContent = "AVANZA 1 NODO ⚙️";
+    if (visorAccionSistema) visorAccionSistema.textContent = "AVANZA 1 NODO ⚙️";
   } 
   else {
     pasosDisponibles = 2;
-    visorAccionSistema.textContent = "SOBRECARGA: AVANZA 2 NODOS ⚡";
+    if (visorAccionSistema) visorAccionSistema.textContent = "SOBRECARGA: AVANZA 2 NODOS ⚡";
   }
 });
 
 socket.on('servidor-retransmitir-movimiento', (datos) => { ejecutarMovimientoFisicoSincronizado(datos.clan, datos.fDes, datos.cDes); });
 
-// NUEVA ANTENA DE INICIO: Desvanece el lobby de preparación y abre el laberinto de golpe
 socket.on('servidor-confirmar-inicio', (datos) => {
   partidaIniciada = true; 
-  pantallaEsperaSlots.classList.add('oculto'); // Oculta Fase 2
-  contenedorPrincipal.classList.remove('oculto'); // Despliega Fase 3
+  if (pantallaEsperaSlots) pantallaEsperaSlots.classList.add('oculto'); 
+  if (contenedorPrincipal) contenedorPrincipal.classList.remove('oculto'); 
   
-  visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
+  if (visorAccionSistema) visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
   if (datos.sorteoCian) ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
   else ordenTurnos = ["hacker2", "hacker1", "hacker4", "hacker3"];
   indiceTurnoActual = 0;
@@ -374,21 +362,19 @@ socket.on('servidor-confirmar-inicio', (datos) => {
 });
 
 socket.on('servidor-confirmar-reinicios', (datos) => {
-  partidaIniciada = false; juegoTerminado = false;
-  bandoAsignado = "espectador";
+  partidaIniciada = false; juegoTerminado = false; bandoAsignado = "espectador";
   indiceTurnoActual = 0; dadoLanzadoEsteTurno = false; pasosDisponibles = 0;
-  cuboNeonDado.textContent = "--"; cuboNeonDado.classList.remove('congelado', 'firewall');
-  visorAccionSistema.textContent = "ESPERANDO INICIO...";
-  historialPosiciones = {};
-  nodosDescubiertosCian = {}; nodosDescubiertosAzul = {}; 
+  if (cuboNeonDado) { cuboNeonDado.textContent = "--"; cuboNeonDado.classList.remove('congelado', 'firewall'); }
+  if (visorAccionSistema) visorAccionSistema.textContent = "ESPERANDO INICIO...";
+  historialPosiciones = {}; nodosDescubiertosCian = {}; nodosDescubiertosAzul = {}; 
   
   posicionesHackers["equipo-cian"] = { f: 0, c: 0, avatar: "💎", clase: "avatar-h1" };
   posicionesHackers["equipo-azul"] = { f: 20, c: 20, avatar: "🔵", clase: "avatar-h2" };
   
-  // Regresamos a la pantalla de preparación
-  contenedorPrincipal.classList.add('oculto');
-  pantallaEsperaSlots.classList.remove('oculto');
+  if (contenedorPrincipal) contenedorPrincipal.classList.add('oculto');
+  if (pantallaEsperaSlots) pantallaEsperaSlots.classList.remove('oculto');
   
   matrizLaberinto = datos.nuevoMapa;
-  alert("La red se ha reiniciado por completo. Volviendo al Lobby de preparación...");
+  alert("La red se ha reiniciado por completo.");
 });
+
