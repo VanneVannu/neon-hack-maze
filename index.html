@@ -59,28 +59,24 @@
       <!-- CUERPO DISTRIBUIDO -->
       <div style="display: flex !important; flex-direction: row !important; gap: 30px !important; justify-content: center !important; align-items: flex-start !important; width: 100% !important;">
         
-        <!-- SUB-COLUMNA IZQUIERDA: LOS DOS CLANES DE SELECCIÓN (PUNTO 2) -->
+        
+        <!-- SUB-COLUMNA IZQUIERDA: CLANES COMPACTOS SIN DUPLICADOS -->
         <div id="grid-slots-preparacion" style="display: flex !important; flex-direction: row !important; gap: 20px !important; margin: 0 !important;">
           <!-- Lado Cian -->
           <div class="bloque-preparacion-equipo cian" style="border: 2px solid #00f0ff; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 4px; width: 160px;">
             <h3 style="color: #00f0ff; text-shadow: 0 0 5px #00f0ff; font-size: 12px; margin-bottom: 10px;">EQUIPO CIAN 💎</h3>
             <button class="btn-ocupar-slot" id="action-hacker1" style="width: 100%; margin-bottom: 8px;">OCUPAR H1</button>
-            <div class="miembro-linea" id="slot-cian-1" style="font-size: 11px; color: #aaa; text-align: left; padding: 4px;">H1: <span class="nombre-slot">Esperando...</span></div>
-            
             <button class="btn-ocupar-slot" id="action-hacker3" style="width: 100%; margin-top: 10px; margin-bottom: 8px;">OCUPAR H3</button>
-            <div class="miembro-linea" id="slot-cian-2" style="font-size: 11px; color: #aaa; text-align: left; padding: 4px;">H3: <span class="nombre-slot">Esperando...</span></div>
           </div>
 
           <!-- Lado Azul -->
           <div class="bloque-preparacion-equipo azul" style="border: 2px solid #007aff; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 4px; width: 160px;">
             <h3 style="color: #007aff; text-shadow: 0 0 5px #007aff; font-size: 12px; margin-bottom: 10px;">EQUIPO AZUL 🔵</h3>
             <button class="btn-ocupar-slot" id="action-hacker2" style="width: 100%; margin-bottom: 8px;">OCUPAR H2</button>
-            <div class="miembro-linea" id="slot-azul-1" style="font-size: 11px; color: #aaa; text-align: left; padding: 4px;">H2: <span class="nombre-slot">Esperando...</span></div>
-            
             <button class="btn-ocupar-slot" id="action-hacker4" style="width: 100%; margin-top: 10px; margin-bottom: 8px;">OCUPAR H4</button>
-            <div class="miembro-linea" id="slot-azul-2" style="font-size: 11px; color: #aaa; text-align: left; padding: 4px;">H4: <span class="nombre-slot">Esperando...</span></div>
           </div>
         </div>
+
 
         <!-- SUB-COLUMNA DERECHA -->
         <div style="display: flex !important; flex-direction: column !important; gap: 20px !important; flex: 1 !important;">
@@ -108,9 +104,19 @@
     </div>
 
     <!-- ZONA CENTRAL DE JUEGO ASIMÉTRICA -->
+        <!-- BARRA SUPERIOR CON NUEVO BOTÓN DE REGRESAR EN JUEGO -->
+    <div id="interfaz">
+      <div id="marcador-turno">Turno: <span id="bando-actual">HACKER 1</span></div>
+      <div id="contenedor-controles">
+        <button id="btn-regresar-juego" style="background: transparent; border: 1px solid #ff007f; color: #ff007f; text-shadow: 0 0 5px #ff007f; font-family: monospace; font-size: 12px; padding: 0 10px; height: 38px; cursor: pointer; border-radius: 4px; margin-right: 10px;">🗙 SALIR DE SALA</button>
+        <button id="btn-reiniciar">Reiniciar Red</button>
+      </div>
+    </div>
+
+    <!-- ZONA CENTRAL DE JUEGO CON PANELES DE TURNOS INTEGRADOS -->
     <div id="zona-juego">
       
-      <!-- COLUMNA LATERAL IZQUIERDA (CHAT EN VIVO) -->
+      <!-- COLUMNA LATERAL IZQUIERDA (CHAT + TURNO CIAN) -->
       <div class="columna-lateral-izquierda">
         <div id="contenedor-chat">
           <div id="titulo-chat">CANAL DE COMUNICACIÓN</div>
@@ -120,22 +126,27 @@
             <button id="btn-enviar-chat">➤</button>
           </div>
         </div>
+
+        <!-- RE-INJECTADO: Cuadro de turnos del equipo Cian abajo del chat -->
+        <div class="panel-equipo" id="panel-equipo-cian" style="margin-top: 15px; border: 1px solid #00f0ff; background: rgba(0,0,0,0.4); border-radius: 4px;">
+          <div class="titulo-equipo cian" style="background: rgba(0,240,255,0.1); color: #00f0ff; padding: 6px; text-align: center; font-size: 11px; font-weight: bold;">EQUIPO CIAN 💎</div>
+          <div style="padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
+            <div class="miembro-linea" id="slot-cian-1">HACKER 1: <span class="nombre-slot">Esperando...</span></div>
+            <div class="miembro-linea" id="slot-cian-2">HACKER 3: <span class="nombre-slot">Esperando...</span></div>
+          </div>
+        </div>
       </div>
 
       <!-- CONTENEDOR CENTRAL DEL LABERINTO -->
       <div id="contenedor-laberinto">
-        <div id="tablero-laberinto">
-          <!-- Las casillas se generan dinámicamente con JS -->
-        </div>
+        <div id="tablero-laberinto"></div>
       </div>
 
-      <!-- COLUMNA LATERAL DERECHA (DADO Y ACCESO) -->
+      <!-- COLUMNA LATERAL DERECHA (DADO, ACCESO + TURNO AZUL) -->
       <div class="columna-lateral-derecha">
         <div id="contenedor-codigo-lateral">
           <div id="titulo-codigo-lateral">NODO DE ACCESO</div>
-          <div id="caja-codigo-texto">
-            <span id="txt-sala-actual">ESPERANDO RED...</span>
-          </div>
+          <div id="caja-codigo-texto"><span id="txt-sala-actual">ESPERANDO RED...</span></div>
         </div> 
 
         <div id="modulo-dado-lateral">
@@ -143,12 +154,20 @@
           <div id="zona-dado-visual"><div id="cubo-neon-dado">--</div></div>
           <div id="visor-accion-sistema">ESPERANDO INICIO...</div>
         </div>
+
+        <!-- RE-INJECTADO: Cuadro de turnos del equipo Azul abajo del dado -->
+        <div class="panel-equipo" id="panel-equipo-azul" style="margin-top: 15px; border: 1px solid #007aff; background: rgba(0,0,0,0.4); border-radius: 4px;">
+          <div class="titulo-equipo azul" style="background: rgba(0,122,255,0.1); color: #007aff; padding: 6px; text-align: center; font-size: 11px; font-weight: bold;">EQUIPO AZUL 🔵</div>
+          <div style="padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
+            <div class="miembro-linea" id="slot-azul-1">HACKER 2: <span class="nombre-slot">Esperando...</span></div>
+            <div class="miembro-linea" id="slot-azul-2">HACKER 4: <span class="nombre-slot">Esperando...</span></div>
+          </div>
+        </div>
         
-        <!-- Visor de Pasos (Heredado de la barra vieja) -->
         <div id="visor-dado" class="oculto">PASOS: --</div>
       </div> 
+    </div><!-- FIN ZONA DE JUEGO -->
 
-    </div> <!-- FIN ZONA JUEGO -->
 
   </div> <!-- FIN CONTENEDOR PRINCIPAL -->
 
