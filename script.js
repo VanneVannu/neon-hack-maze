@@ -200,6 +200,17 @@ if (btnRegresarLobby) {
   });
 }
 
+// --- CAPTURAR EL ID EXACTO DE LA FASE 2 DEL LOBBY DE ESPERA ---
+const btnIniciarPartida = document.getElementById('btn-iniciar-partida-lobby'); // <-- CAMBIA ESTA LÍNEA EXACTAMENTE ASÍ
+
+// Las líneas de abajo se quedan exactamente igual que antes:
+const btnReiniciar = document.getElementById('btn-reiniciar');
+const selectorBando = document.getElementById('selector-bando');
+const bandoActualTxt = document.getElementById('bando-actual');
+const btnTirarDado = document.getElementById('btn-tirar-dado');
+const cuboNeonDado = document.getElementById('cubo-neon-dado');
+const visorAccionSistema = document.getElementById('visor-accion-sistema');
+
 
 // --- MOVIMIENTOS POR INTERNET ---
 function handleCasillaClick(fila, columna) {
