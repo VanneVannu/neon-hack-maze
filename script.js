@@ -294,6 +294,14 @@ if (btnTirarDado) {
   });
 }
 
+const btnRegresarJuego = document.getElementById('btn-regresar-juego');
+// Escuchar el clic para desconectar desde adentro de la partida en curso
+if (btnRegresarJuego) {
+  btnRegresarJuego.addEventListener('click', () => {
+    // Forzamos la recarga dura para limpiar sockets de Render y volver a la Fase 1
+    window.location.reload(); 
+  });
+}
 
 
 // ==========================================
