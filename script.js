@@ -373,6 +373,7 @@ socket.on('servidor-retransmitir-dado', (datos) => {
 
 socket.on('servidor-retransmitir-movimiento', (datos) => { ejecutarMovimientoFisicoSincronizado(datos.clan, datos.fDes, datos.cDes); });
 
+// --- RETROALIMENTACIÓN DE INICIO: RECIBE EL MAPA Y ENCIENDE LOS APODOS ---
 socket.on('servidor-confirmar-inicio', (datos) => {
   partidaIniciada = true; 
   if (pantallaEsperaSlots) pantallaEsperaSlots.classList.add('oculto'); 
@@ -380,13 +381,26 @@ socket.on('servidor-confirmar-inicio', (datos) => {
   
   if (visorAccionSistema) visorAccionSistema.textContent = "LANZA EL DADO EN TU TURNO";
   
-  // --- PUNTO 3: DEVOLVER LAS ALERTAS MULTIJUGADOR DE SORTEO ---
+
+  
+  // --- ¡AQUÍ SE LOGRA LA MAGIA! Destupimos los letreros inyectando los alias reales ---
+  const slot1 = document.querySelector('#slot-cian-1 .nombre-slot');
+  const slot2 = document.querySelector('#slot-azul-1 .nombre-slot');
+  const slot3 = document.querySelector('#slot-cian-2 .nombre-slot');
+  const slot4 = document.querySelector('#slot-azul-2 .nombre-slot');
+
+  if (slot1) slot1.textContent = datos.n1;
+  if (slot2) slot2.textContent = datos.n2;
+  if (slot3) slot3.textContent = datos.n3;
+  if (slot4) slot4.textContent = datos.n4;
+  // ---------------------------------------------------------------------------------
+
   if (datos.sorteoCian) {
     ordenTurnos = ["hacker1", "hacker2", "hacker3", "hacker4"];
-    alert("🎲 [SISTEMA DE SORTEO]: Moneda digital lanzada. ¡El EQUIPO CIAN toma la delantera! Turno de HACKER 1.");
+    alert("🎲 [SORTEO]: ¡El EQUIPO CIAN toma la delantera! Turno de HACKER 1.");
   } else {
     ordenTurnos = ["hacker2", "hacker1", "hacker4", "hacker3"];
-    alert("🎲 [SISTEMA DE SORTEO]: Moneda digital lanzada. ¡El EQUIPO AZUL toma la delantera! Turno de HACKER 2.");
+    alert("🎲 [SORTEO]: ¡El EQUIPO AZUL toma la delantera! Turno de HACKER 2.");
   }
   
   indiceTurnoActual = 0;
