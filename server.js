@@ -142,9 +142,23 @@ io.on('connection', (socket) => {
     if (socket.miRedActual) io.to(socket.miRedActual).emit('servidor-retransmitir-movimiento', datosMovimiento);
   });
 
+    // --- 5. MODIFICADO: RETRANSMITIR INICIO ADJUNTANDO LOS NOMBRES DE LA SALA ---
   socket.on('solicitar-inicio-partida', (datosSorteo) => {
-    if (socket.miRedActual) io.to(socket.miRedActual).emit('servidor-confirmar-inicio', datosSorteo);
+    const redNombre = socket.miRedActual;
+    if (redNombre && redesOcupadas[redNombre]) {
+      let red = redesOcupadas[redNombre];
+
+      // Acoplamos los nombres de los 4 slots al paquete de inicio
+      datosSorteo.n1 = red.nombreH1 || "Esperando...";
+      datosSorteo.n2 = red.nombreH2 || "Esperando...";
+      datosSorteo.n3 = red.nombreH3 || "Esperando...";
+      datosSorteo.n4 = red.nombreH4 || "Esperando...";
+
+      // Enviamos el disparo de inicio con los alias incluidos
+      io.to(redNombre).emit('servidor-confirmar-inicio', datosSorteo);
+    }
   });
+
 
   socket.on('solicitar-reiniciar-red', () => {
     const redNombre = socket.miRedActual;
@@ -162,7 +176,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // --- 5. DESCONEXIÓN LIMPIA DE TERMINALES ---
+  // --- 6. DESCONEXIÓN LIMPIA DE TERMINALES ---
   socket.on('disconnect', () => {
     const redNombre = socket.miRedActual;
     if (redNombre && redesOcupadas[redNombre]) {
