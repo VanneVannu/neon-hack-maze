@@ -612,3 +612,20 @@ body {
 .bloque-acciones-red {
   margin-top: 10px !important;
 }
+
+/* --- SELLO DE PROTECCIÓN LEGAL DE COPYRIGHT AL FONDO --- */
+#patente-cyberpunk-fondo {
+  width: 100% !important;
+  text-align: center !important;
+  font-size: 9px !important;
+  color: rgba(0, 240, 255, 0.25) !important; /* Cian neón semitransparente muy elegante */
+  letter-spacing: 1px !important;
+  padding: 25px 0 15px 0 !important;
+  font-family: monospace !important;
+  text-transform: uppercase !important;
+  position: relative !important;
+  z-index: 99999 !important;
+  clear: both !important;
+}
+
+
