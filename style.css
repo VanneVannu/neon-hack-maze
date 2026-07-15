@@ -630,4 +630,28 @@ body {
   pointer-events: none !important; /* Evita que estorbe si alguien hace clic cerca */
 }
 
+.btn-regresar-arcade {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #11081f;
+  border: 2px solid #ff007f;
+  color: #ff007f;
+  padding: 8px 14px;
+  text-decoration: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 4px;
+  z-index: 9999; /* Para que siempre quede por encima de la niebla de guerra o el laberinto */
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-regresar-arcade:hover {
+  background: #ff007f;
+  color: #fff;
+  box-shadow: 0 0 15px #ff007f;
+  transform: scale(1.05);
+}
 
