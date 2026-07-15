@@ -614,18 +614,20 @@ body {
 }
 
 /* --- SELLO DE PROTECCIÓN LEGAL DE COPYRIGHT AL FONDO --- */
+/* --- TRUCO DE ANCLAJE DEFINITIVO AL FONDO DE LA PANTALLA --- */
 #patente-cyberpunk-fondo {
+  position: fixed !important; /* Se amarra de forma fija a la ventana del monitor */
+  bottom: 12px !important;    /* Deja un sutil margen de 12 píxeles con el borde inferior */
+  left: 0 !important;
   width: 100% !important;
   text-align: center !important;
   font-size: 9px !important;
-  color: rgba(0, 240, 255, 0.25) !important; /* Cian neón semitransparente muy elegante */
+  color: rgba(0, 240, 255, 0.25) !important; /* Cian neón semitransparente ultra elegante */
   letter-spacing: 1px !important;
-  padding: 25px 0 15px 0 !important;
   font-family: monospace !important;
   text-transform: uppercase !important;
-  position: relative !important;
-  z-index: 99999 !important;
-  clear: both !important;
+  z-index: 999999 !important; /* Pasa por encima de cualquier capa oscura o rejilla */
+  pointer-events: none !important; /* Evita que estorbe si alguien hace clic cerca */
 }
 
 
